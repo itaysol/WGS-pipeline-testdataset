@@ -7,6 +7,3 @@ tasks:
       . /opt/conda/etc/profile.d/conda.sh
       conda activate base
       mamba install -y -q -c bioconda fastp snakemake kraken2 fastq-dl pysradb
-
-vscode:
-  extensions: # based on nf-core.nf-core-extensionpack
