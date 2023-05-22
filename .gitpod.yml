@@ -1,0 +1,13 @@
+image: nfcore/gitpod:latest
+
+tasks:
+  - name: Initialize
+    init: |
+      pip install graphviz
+      . /opt/conda/etc/profile.d/conda.sh
+      conda activate base
+      mamba create -n gene-pipeline -y -q --c conda-forge -c bioconda fastp snakemake kraken2 fastq-dl pysradb
+      conda activate gene-pipeline
+
+vscode:
+  extensions: # based on nf-core.nf-core-extensionpack
