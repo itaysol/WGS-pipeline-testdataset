@@ -6,7 +6,7 @@ tasks:
       pip install graphviz
       . /opt/conda/etc/profile.d/conda.sh
       conda activate base
-      mamba create -n gene-pipeline -y -q --c conda-forge -c bioconda fastp snakemake kraken2 fastq-dl pysradb
+      mamba create -n gene-pipeline -y -q -c conda-forge -c bioconda fastp snakemake kraken2 fastq-dl pysradb
       conda activate gene-pipeline
 
 vscode:
