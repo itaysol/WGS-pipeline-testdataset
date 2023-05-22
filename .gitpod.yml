@@ -7,3 +7,4 @@ tasks:
       . /opt/conda/etc/profile.d/conda.sh
       conda activate base
       mamba install -y -q -c bioconda fastp kraken2
+      bash test.data.sh
