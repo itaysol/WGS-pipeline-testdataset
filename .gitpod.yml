@@ -6,4 +6,4 @@ tasks:
       pip install graphviz
       . /opt/conda/etc/profile.d/conda.sh
       conda activate base
-      mamba install -y -q -c bioconda fastp snakemake kraken2 fastq-dl pysradb
+      mamba install -y -q -c bioconda fastp snakemake=4.0.0 kraken2 fastq-dl pysradb
