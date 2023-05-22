@@ -3,7 +3,7 @@ image: nfcore/gitpod:latest
 tasks:
   - name: Initialize
     init: |
-      pip install graphviz
+      pip install graphviz snakemake
       . /opt/conda/etc/profile.d/conda.sh
       conda activate base
-      mamba install -y -q -c bioconda fastp snakemake=4.0.0 kraken2 fastq-dl pysradb
+      mamba install -y -q -c bioconda fastp kraken2 fastq-dl pysradb
