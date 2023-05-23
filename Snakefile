@@ -21,8 +21,8 @@ rule process_file_pair:
         fwd = "fastq/{id}_1.fastq.gz",
         rev = "fastq/{id}_2.fastq.gz"
     output:
-        r1_clean = os.path.join(output_dir, "fastq/{id}/{id}_1.fastq.gz"),
-        r2_clean = os.path.join(output_dir, "fastq/{id}/{id}_2.fastq.gz"),
+        r1_clean = os.path.join(output_dir, "fastq/{id}/{id}.clean_1.fastq.gz"),
+        r2_clean = os.path.join(output_dir, "fastq/{id}/{id}.clean_2.fastq.gz"),
         html = os.path.join(output_dir, "fastq/{id}/{id}.fastp.html"),
         json = os.path.join(output_dir, "fastq/{id}/{id}.fastp.json")
     shell:
