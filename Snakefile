@@ -14,7 +14,7 @@ output_dir = "output"
 # Define the final rule that specifies the targets to generate
 rule all:
     input:
-          expand("output/fastq/{id}/{id}_1.fastq.gz", id=IDS), expand("output/fastq/{id}/{id}_2.fastq.gz", id=IDS)
+          expand("output/fastq/{id}/{id}.clean_1.fastq.gz", id=IDS), expand("output/fastq/{id}/{id}.clean_2.fastq.gz", id=IDS)
 
 rule process_file_pair:
     input:
