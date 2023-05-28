@@ -30,8 +30,7 @@ rule process_file_pair:
         html = os.path.join(output_dir, "fastq/{id}/{id}.fastp.html"),
         json = os.path.join(output_dir, "fastq/{id}/{id}.fastp.json")
     log:
-        logfile = os.path.join(output_dir, "fastq/{id}/{id}.fastp.log.txt"),
-        "{logfile}"
+        "output/fastq/{id}/{id}.fastp.log.txt"
     shell:
         """
         fastp -i {input.fwd} -I {input.rev} \
