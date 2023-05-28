@@ -17,6 +17,10 @@ rule all:
           expand("output/fastq/{id}/{id}.clean_1.fastq.gz", id=IDS), expand("output/fastq/{id}/{id}.clean_2.fastq.gz", id=IDS)
 
 rule process_file_pair:
+    conda:
+        "env/conda-qc.yaml"
+    threads:
+        3
     input:
         fwd = "fastq/{id}_1.fastq.gz",
         rev = "fastq/{id}_2.fastq.gz"
@@ -25,6 +29,9 @@ rule process_file_pair:
         r2_clean = os.path.join(output_dir, "fastq/{id}/{id}.clean_2.fastq.gz"),
         html = os.path.join(output_dir, "fastq/{id}/{id}.fastp.html"),
         json = os.path.join(output_dir, "fastq/{id}/{id}.fastp.json")
+    log:
+        logfile = os.path.join(output_dir, "fastq/{id}/{id}.fastp.log.txt"),
+        "{logfile}"
     shell:
         """
         fastp -i {input.fwd} -I {input.rev} \
