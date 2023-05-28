@@ -1,0 +1,9 @@
+name: gene-pipeline-qc
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+  - anaconda
+dependencies:
+  - bioconda::fastp
+  - bioconda::multiqc
