@@ -37,6 +37,19 @@ rule process_file_pair:
               -o {output.r1_clean} -O {output.r2_clean} \
               -w 3 -h {output.html} -j {output.json}
         """
+ rule run_kraken2:
+    input:
+        r1_clean=rules.process_file_pair.output.r1_clean,
+        r2_clean=rules.process_file_pair.output.r2_clean
+    output:
+        kraken_report=os.path.join(output_dir, "{id}.kraken_taxonomy.txt"),
+        kraken_output=os.path.join(output_dir, "{id}.kraken_output.txt")
+    threads: 4
+    shell:
+        """
+        kraken2 --paired --threads {threads} --report {output.kraken_report} --output {output.kraken_output} \
+            {input.r1_clean} {input.r2_clean}
+        """
 
 
 
