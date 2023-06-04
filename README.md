@@ -6,7 +6,7 @@
 
 ## pipeline structure
 
-from bohra (https://github.com/MDU-PHL/bohra): ![pipeline](https://github.com/MDU-PHL/bohra/blob/master/workflow.png?raw=true)
+from bohra (https://github.com/MDU-PHL/bohra): ![pipeline](Bohra.workflow.png)
 
 | step | name | nodes on figure | tools involved |
 | --- | --- | --- | --- |
