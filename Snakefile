@@ -17,6 +17,10 @@ rule all:
           expand("output/fastq/{id}/{id}.clean_1.fastq.gz", id=IDS), expand("output/fastq/{id}/{id}.clean_2.fastq.gz", id=IDS)
 
 rule process_file_pair:
+    conda:
+        "env/conda-qc.yaml"
+    threads:
+        3
     input:
         fwd = "fastq/{id}_1.fastq.gz",
         rev = "fastq/{id}_2.fastq.gz"
@@ -25,11 +29,26 @@ rule process_file_pair:
         r2_clean = os.path.join(output_dir, "fastq/{id}/{id}.clean_2.fastq.gz"),
         html = os.path.join(output_dir, "fastq/{id}/{id}.fastp.html"),
         json = os.path.join(output_dir, "fastq/{id}/{id}.fastp.json")
+    log:
+        "output/fastq/{id}/{id}.fastp.log.txt"
     shell:
         """
         fastp -i {input.fwd} -I {input.rev} \
               -o {output.r1_clean} -O {output.r2_clean} \
               -w 3 -h {output.html} -j {output.json}
+        """
+ rule run_kraken2:
+    input:
+        r1_clean=rules.process_file_pair.output.r1_clean,
+        r2_clean=rules.process_file_pair.output.r2_clean
+    output:
+        kraken_report=os.path.join(output_dir, "{id}.kraken_taxonomy.txt"),
+        kraken_output=os.path.join(output_dir, "{id}.kraken_output.txt")
+    threads: 4
+    shell:
+        """
+        kraken2 --paired --threads {threads} --report {output.kraken_report} --output {output.kraken_output} \
+            {input.r1_clean} {input.r2_clean}
         """
 
 

@@ -1,0 +1,8 @@
+name: gene-pipeline
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+  - anaconda
+dependencies:
+  - bioconda::snakemake=7.24.2
