@@ -1,20 +1,24 @@
 import os
+import sys
 from snakemake.io import glob_wildcards
 
 IDS, = glob_wildcards("fastq/{id}_1.fastq.gz")
 
-print(IDS)
-# # Define the input directory containing the FASTQ files
-# input_file1 = "fastq/SRR7204427_R1.fastq.gz"
-# input_file2 = "fastq/SRR7204427_R2.fastq.gz"
-
 # Define the output directory
 output_dir = "output"
 
+#Define the specie we want to check
+specie="ppp"
+if len(sys.argv) > 5:
+    specie = sys.argv[5][7:]
+
+print(specie)
 # Define the final rule that specifies the targets to generate
 rule all:
     input:
-          expand("output/fastq/{id}/{id}.clean_1.fastq.gz", id=IDS), expand("output/fastq/{id}/{id}.clean_2.fastq.gz", id=IDS)
+          expand("output/fastq/{id}/{id}.clean_1.fastq.gz", id=IDS), expand("output/fastq/{id}/{id}.clean_2.fastq.gz", id=IDS),
+          expand("output/kraken/{id}/{id}.kraken_taxonomy.txt",id=IDS), expand("output/kraken/{id}/{id}.kraken_output.txt",id=IDS),
+          expand("output/bracken/{id}.bracken_output.tsv",id=IDS)
 
 rule process_file_pair:
     conda:
@@ -37,21 +41,38 @@ rule process_file_pair:
               -o {output.r1_clean} -O {output.r2_clean} \
               -w 3 -h {output.html} -j {output.json}
         """
- rule run_kraken2:
+
+
+rule run_kraken2:
+    conda:
+        "env/conda-kraken2.yaml"
     input:
-        r1_clean=rules.process_file_pair.output.r1_clean,
-        r2_clean=rules.process_file_pair.output.r2_clean
+        clean_fwd="output/fastq/{id}/{id}.clean_1.fastq.gz",
+        clean_rev="output/fastq/{id}/{id}.clean_2.fastq.gz"
     output:
-        kraken_report=os.path.join(output_dir, "{id}.kraken_taxonomy.txt"),
-        kraken_output=os.path.join(output_dir, "{id}.kraken_output.txt")
+        kraken_report=os.path.join(output_dir, "kraken/{id}/{id}.kraken_taxonomy.txt"),
+        kraken_output=os.path.join(output_dir, "kraken/{id}/{id}.kraken_output.txt"),
     threads: 4
     shell:
         """
-        kraken2 --paired --threads {threads} --report {output.kraken_report} --output {output.kraken_output} \
-            {input.r1_clean} {input.r2_clean}
+        kraken2 --db /workspace/Gene-pipeline/databases/k2/minikraken2_v2_8GB_201904_UPDATE --threads 4 --report {output.kraken_report} --output {output.kraken_output} \
+            --paired {input.clean_fwd} {input.clean_rev}
         """
 
-
-
-
-
+rule run_bracken:
+    conda:
+        "env/conda-bracken.yaml"
+    input:
+       kraken_report_file= "output/kraken/{id}/{id}.kraken_taxonomy.txt"
+    output:
+        bracken_output= os.path.join(output_dir, "bracken/{id}.bracken_output.tsv")
+    shell:
+        """
+            bracken -i {input.kraken_report_file} -d /workspace/Gene-pipeline/databases/k2/minikraken2_v2_8GB_201904_UPDATE -o {output.bracken_output}
+        """
+#rule sample_validation:
+ #   conda:
+  #      "env/conda-sample_val"
+   # input: 
+    #    bracken_output_file= "output/bracken/{id}.bracken_output.tsv"
+        
