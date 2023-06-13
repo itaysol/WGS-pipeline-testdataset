@@ -70,9 +70,7 @@ rule run_bracken:
         """
             bracken -i {input.kraken_report_file} -d /workspace/Gene-pipeline/databases/k2/minikraken2_v2_8GB_201904_UPDATE -o {output.bracken_output}
         """
-#rule sample_validation:
- #   conda:
-  #      "env/conda-sample_val"
-   # input: 
-    #    bracken_output_file= "output/bracken/{id}.bracken_output.tsv"
+rule sample_validation:
+    input: 
+        bracken_output_file= "output/bracken/{id}.bracken_output.tsv"
         
