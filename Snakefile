@@ -1,24 +1,34 @@
 import os
 import sys
 from snakemake.io import glob_wildcards
+import csv
 
-IDS, = glob_wildcards("fastq/{id}_1.fastq.gz")
+# Read the CSV config file
+config_file = 'user_config_file.csv'  # Replace with your CSV config file path
+samples = []
+ids= []
 
+with open(config_file, 'r') as file:
+    csv_reader = csv.DictReader(file)
+    for row in csv_reader:
+        samples.append(dict(row))
+for row in samples:
+    ids.append(row['\ufeffSample_ID'])
+    
 # Define the output directory
 output_dir = "output"
 
 #Define the specie we want to check
-specie="ppp"
-if len(sys.argv) > 5:
-    specie = sys.argv[5][7:]
 
-print(specie)
 # Define the final rule that specifies the targets to generate
 rule all:
     input:
-          expand("output/fastq/{id}/{id}.clean_1.fastq.gz", id=IDS), expand("output/fastq/{id}/{id}.clean_2.fastq.gz", id=IDS),
-          expand("output/kraken/{id}/{id}.kraken_taxonomy.txt",id=IDS), expand("output/kraken/{id}/{id}.kraken_output.txt",id=IDS),
-          expand("output/bracken/{id}.bracken_output.tsv",id=IDS)
+        expand("output/fastq/{id}/{id}.clean_1.fastq.gz", id=ids),
+        expand("output/fastq/{id}/{id}.clean_2.fastq.gz", id=ids),
+        expand("output/kraken/{id}/{id}.kraken_taxonomy.txt", id=ids),
+        expand("output/kraken/{id}/{id}.kraken_output.txt", id=ids),
+        expand("output/bracken/{id}.bracken_output.tsv", id=ids),
+        expand("output/sample_validation/{id}.output.txt", id=ids)
 
 rule process_file_pair:
     conda:
@@ -26,8 +36,8 @@ rule process_file_pair:
     threads:
         3
     input:
-        fwd = "fastq/{id}_1.fastq.gz",
-        rev = "fastq/{id}_2.fastq.gz"
+        fwd = samples[0]['R1Fastq'],
+        rev = samples[0]['R2Fastq']
     output:
         r1_clean = os.path.join(output_dir, "fastq/{id}/{id}.clean_1.fastq.gz"),
         r2_clean = os.path.join(output_dir, "fastq/{id}/{id}.clean_2.fastq.gz"),
@@ -72,6 +82,16 @@ rule run_bracken:
         """
 rule sample_validation:
     input: 
-        bracken_output_file= "output/bracken/{id}.bracken_output.tsv"
-    #hihi
+        bracken_output_file= "output/bracken/{id}.bracken_output.tsv",
+    output:
+        sample_validation_output= os.path.join(output_dir, "sample_validation/{id}.output.txt")
+    params:
+        specie = samples[0]['expectedSpecies'],
+        sample_id = ids[0]
+    shell:    
+         """
+         python samp_val.py --input {input.bracken_output_file} --output {output.sample_validation_output} {params.specie} {params.sample_id}
+         
+         """
+
         
