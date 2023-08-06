@@ -18,8 +18,6 @@ for row in samples:
 # Define the output directory
 output_dir = "output"
 
-#Define the specie we want to check
-
 # Define the final rule that specifies the targets to generate
 rule all:
     input:
@@ -28,7 +26,9 @@ rule all:
         expand("output/kraken/{id}/{id}.kraken_taxonomy.txt", id=ids),
         expand("output/kraken/{id}/{id}.kraken_output.txt", id=ids),
         expand("output/bracken/{id}.bracken_output.tsv", id=ids),
-        expand("output/sample_validation/{id}.output.txt", id=ids)
+        expand("output/sample_validation/SRR11901822.output.txt"),
+        expand("output/assembly/SRR11901822/SRR11901822.fasta")
+        
 
 rule process_file_pair:
     conda:
@@ -93,5 +93,20 @@ rule sample_validation:
          python samp_val.py --input {input.bracken_output_file} --output {output.sample_validation_output} {params.specie} {params.sample_id}
          
          """
+
+rule assembly:
+    conda:
+         "env/conda-assembly.yaml"
+    input:
+        clean_fwd=os.path.join(output_dir,"fastq/{id}/{id}.clean_1.fastq.gz"),
+        clean_rev=os.path.join(output_dir,"fastq/{id}/{id}.clean_2.fastq.gz")
+    output:
+        assembly_output = os.path.join(output_dir ,"assembly/{id}/{id}.fasta")
+    shell:
+        """
+        shovill --trim --R1 {input.clean_fwd} --R2 {input.clean_rev} --outdir {output.assembly_output} 
+        
+        """
+
 
         
