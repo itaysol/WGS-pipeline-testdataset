@@ -1,0 +1,5 @@
+sample,id,R1Fastq,R2Fastq,specie,comparison group,user name
+sample1,SRR11901822,fastq/SRR11901822_1.fastq.gz,fastq/SRR11901822_2.fastq.gz,Mycoplasma hominis,1,1
+sample2,SRR11901823,fastq/SRR11901823_1.fastq.gz,fastq/SRR11901823_2.fastq.gz,Mycoplasma hominis,1,1
+sample3,SRR11901824,fastq/SRR11901824_1.fastq.gz,fastq/SRR11901824_2.fastq.gz,Mycoplasma hominis,1,1
+sample4,SRR11901825,fastq/SRR11901825_1.fastq.gz,fastq/SRR11901825_2.fastq.gz,Mycoplasma hominis,1,1

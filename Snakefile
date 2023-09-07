@@ -3,13 +3,13 @@ import sys
 from snakemake.io import glob_wildcards
 import yaml
 import csv
+from parser import parser
 
-# Read the YAML config file
-configfile:  "user_config_file.yaml"  # Replace with your yaml config file path
+
+configfile : parser(config["file"])
 
 # Define the output directory
 output_dir = "output"
-
 
 # Define the final rule that specifies the targets to generate
 rule all:
