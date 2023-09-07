@@ -1,54 +1,30 @@
-﻿__use_yte__ : true
 Samples:
   sample1:
-    id:
-      SRR11901822
-    R1Fastq:
-      fastq/SRR11901822_1.fastq.gz
-    R2Fastq:
-      fastq/SRR11901822_2.fastq.gz
-    specie:
-      Mycoplasma hominis
-    comparison group:
-      1
-    user name:
-      1
+    R1Fastq: fastq/SRR11901822_1.fastq.gz
+    R2Fastq: fastq/SRR11901822_2.fastq.gz
+    comparison group: '1'
+    id: SRR11901822
+    specie: Mycoplasma hominis
+    user name: '1'
   sample2:
-    id:
-      SRR11901823
-    R1Fastq:
-      fastq/SRR11901823_1.fastq.gz
-    R2Fastq:
-      fastq/SRR11901823_2.fastq.gz
-    specie:
-      Mycoplasma hominis
-    comparison group:
-      1
-    user name:
-      1
+    R1Fastq: fastq/SRR11901823_1.fastq.gz
+    R2Fastq: fastq/SRR11901823_2.fastq.gz
+    comparison group: '1'
+    id: SRR11901823
+    specie: Mycoplasma hominis
+    user name: '1'
   sample3:
-    id:
-      SRR11901824
-    R1Fastq:
-      fastq/SRR11901824_1.fastq.gz
-    R2Fastq:
-      fastq/SRR11901824_2.fastq.gz
-    specie:
-      Mycoplasma hominis
-    comparison group:
-      1
-    user name:
-      1
+    R1Fastq: fastq/SRR11901824_1.fastq.gz
+    R2Fastq: fastq/SRR11901824_2.fastq.gz
+    comparison group: '1'
+    id: SRR11901824
+    specie: Mycoplasma hominis
+    user name: '1'
   sample4:
-    id:
-      SRR11901825
-    R1Fastq:
-      fastq/SRR11901825_1.fastq.gz
-    R2Fastq:
-      fastq/SRR11901825_2.fastq.gz
-    specie:
-      Mycoplasma hominis
-    comparison group:
-      1
-    user name:
-      1
+    R1Fastq: fastq/SRR11901825_1.fastq.gz
+    R2Fastq: fastq/SRR11901825_2.fastq.gz
+    comparison group: '1'
+    id: SRR11901825
+    specie: Mycoplasma hominis
+    user name: '1'
+__use_yte__: true
