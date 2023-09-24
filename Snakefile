@@ -31,10 +31,10 @@ rule process_file_pair:
         fwd = lambda wildcards: config["Samples"][wildcards.id[:7]]["R1Fastq"],
         rev = lambda wildcards: config["Samples"][wildcards.id[:7]]["R2Fastq"]
     output:
-        r1_clean = os.path.join(output_dir, "fastq/{id}/{id}.clean_1.fastq.gz"),
-        r2_clean = os.path.join(output_dir, "fastq/{id}/{id}.clean_2.fastq.gz"),
-        html = os.path.join(output_dir, "fastq/{id}/{id}.fastp.html"),
-        json = os.path.join(output_dir, "fastq/{id}/{id}.fastp.json")
+        r1_clean = temporary(os.path.join(output_dir, "fastq/{id}/{id}.clean_1.fastq.gz")),
+        r2_clean = temporary(os.path.join(output_dir, "fastq/{id}/{id}.clean_2.fastq.gz")),
+        html = temporary(os.path.join(output_dir, "fastq/{id}/{id}.fastp.html")),
+        json = temporary(os.path.join(output_dir, "fastq/{id}/{id}.fastp.json"))
     log:
         "output/fastq/{id}/{id}.fastp.log.txt"
     shell:
@@ -51,8 +51,8 @@ rule run_kraken2:
         clean_fwd=lambda wildcards: os.path.join(output_dir, "fastq", wildcards.id, f"{wildcards.id}.clean_1.fastq.gz"),
         clean_rev=lambda wildcards: os.path.join(output_dir, "fastq", wildcards.id, f"{wildcards.id}.clean_2.fastq.gz")
     output:
-        kraken_report = os.path.join(output_dir, "kraken", "{id}", "{id}.kraken_taxonomy.txt"),
-        kraken_output = os.path.join(output_dir, "kraken", "{id}", "{id}.kraken_output.txt"),
+        kraken_report = temporary(os.path.join(output_dir, "kraken", "{id}", "{id}.kraken_taxonomy.txt")),
+        kraken_output = temporary(os.path.join(output_dir, "kraken", "{id}", "{id}.kraken_output.txt")),
     threads: 4
     shell:
         """
@@ -66,7 +66,7 @@ rule run_bracken:
     input:
        kraken_report_file= lambda wildcards: os.path.join(output_dir, "kraken", wildcards.id, f"{wildcards.id}.kraken_taxonomy.txt")
     output:
-        bracken_output= os.path.join(output_dir, "bracken", "{id}.bracken_output.tsv")
+        bracken_output= temporary(os.path.join(output_dir, "bracken", "{id}.bracken_output.tsv"))
     shell:
         """
             bracken -i {input.kraken_report_file} -d /workspace/Gene-pipeline/databases/k2/minikraken2_v2_8GB_201904_UPDATE -o {output.bracken_output}
@@ -78,7 +78,7 @@ rule sample_validation:
     input: 
         bracken_output_file = lambda wildcards: os.path.join(output_dir, "bracken", f"{wildcards.id}.bracken_output.tsv"),
     output:
-        sample_validation_output = os.path.join(output_dir, "sample_validation", "{id}.output.txt")
+        sample_validation_output = temporary(os.path.join(output_dir, "sample_validation", "{id}.output.txt"))
     params:
         specie = lambda wildcards: config["Samples"][wildcards.id]["specie"],
         sample_id = lambda wildcards: wildcards.id
@@ -95,7 +95,7 @@ rule assembly:
         clean_fwd = os.path.join(output_dir, "fastq", "{id}", "{id}.clean_1.fastq.gz"),
         clean_rev = os.path.join(output_dir, "fastq", "{id}", "{id}.clean_1.fastq.gz"),
     output:
-        assembly_output = directory("output/assembly/{id}.fasta")
+        assembly_output = temporary(directory("output/assembly/{id}.fasta"))
     shell:
         """
         shovill --trim --R1 {input.clean_fwd} --R2 {input.clean_rev} --outdir {output.assembly_output} 
