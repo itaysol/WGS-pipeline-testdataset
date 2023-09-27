@@ -1,0 +1,12 @@
+name: gene-pipeline-whole-genome-validation
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+  - anaconda
+dependencies:
+  - bioconda::kraken2
+  - bioconda::bracken
+  - bioconda::mlst
+  #- bioconda::Rmlst
+  
