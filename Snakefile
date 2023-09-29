@@ -20,9 +20,11 @@ rule all:
         expand("output/kraken/{sample}/{sample}.kraken_output.txt", sample = config["Samples"].keys()),
         expand("output/bracken/{sample}.bracken_output.tsv", sample = config["Samples"].keys()),
         expand("output/sample_validation/{sample}.output.txt", sample = config["Samples"].keys()),
-        expand("output/assembly/{sample}/{sample}.fasta/contigs.fa", sample = config["Samples"].keys()),
-        expand("output/wgv/{sample}/{sample}.kraken_taxonomy.txt", sample = config["Samples"].keys()),
-        expand("output/wgv/{sample}/{sample}.kraken_output.txt", sample = config["Samples"].keys())
+        expand("output/assembly/{sample}", sample = config["Samples"].keys()),
+        expand("output/wgkb/{sample}/{sample}.kraken_taxonomy.txt", sample = config["Samples"].keys()),
+        expand("output/wgkb/{sample}/{sample}.kraken_output.txt", sample = config["Samples"].keys()),
+        expand("output/wgkb/{sample}/{sample}.bracken_output.txt", sample = config["Samples"].keys()),
+       # expand("output/wgv/{sample}/{sample}.validation_output.txt", sample = config["Samples"].keys())
         
 
 
@@ -82,9 +84,9 @@ rule sample_validation:
     input: 
         bracken_output_file = lambda wildcards: os.path.join(output_dir, "bracken", f"{wildcards.id}.bracken_output.tsv"),
     output:
-        sample_validation_output = temporary(os.path.join(output_dir, "sample_validation", "{id}.output.txt"))
+        sample_validation_output = os.path.join(output_dir, "sample_validation", "{id}.output.txt")
     params:
-        specie = lambda wildcards: config["Samples"][wildcards.id]["specie"],
+        specie = lambda wildcards: config["Samples"][wildcards.id[:7]]["specie"],
         sample_id = lambda wildcards: wildcards.id
     shell:    
          """
@@ -99,31 +101,50 @@ rule assembly:
         clean_fwd = os.path.join(output_dir, "fastq", "{id}", "{id}.clean_1.fastq.gz"),
         clean_rev = os.path.join(output_dir, "fastq", "{id}", "{id}.clean_1.fastq.gz"),
     output:
-        assembly_output = temporary("output/assembly/{id}.fasta/contigs.fa")
+        assembly_output = directory("output/assembly/{id}")
     shell:
         """
         shovill --trim --R1 {input.clean_fwd} --R2 {input.clean_rev} --outdir {output.assembly_output} 
         
         """
 
-rule whole_genome_validation:
+rule whole_genome_krak_brack:
     conda:
         "env/conda-whole_genome_validation.yaml"
     input:
-        contigs_file = os.path.join(output_dir, "assembly", "{id}", "{id}.fasta", "contigs.fa")
+        contigs_file = os.path.join(output_dir, "assembly", "{id}")
     output:
-        wgv_kraken_report = os.path.join(output_dir, "wgv", "{id}", "{id}.kraken_taxonomy.txt"),
-        wgv_kraken_output = os.path.join(output_dir, "wgv", "{id}", "{id}.kraken_output.txt")
+        wgv_kraken_report = os.path.join(output_dir, "wgkb", "{id}", "{id}.kraken_taxonomy.txt"),
+        wgv_kraken_output = os.path.join(output_dir, "wgkb", "{id}", "{id}.kraken_output.txt"),
+        wgv_bracken_output = os.path.join(output_dir, "wgkb", "{id}", "{id}.bracken_output.txt"),
+        
     params:
-        specie = lambda wildcards: config["Samples"][wildcards.id]["specie"],
+        specie = lambda wildcards: config["Samples"][wildcards.id[:7]]["specie"],
         sample_id = lambda wildcards: wildcards.id
     shell:
         """
-        echo "Input Contigs File: {input.contigs_file}"
         kraken2 --db /workspace/Gene-pipeline/databases/k2/minikraken2_v2_8GB_201904_UPDATE \
-         --threads 4 --report {output.wgv_kraken_report} --output {output.wgv_kraken_output} {input.contigs_file}
+         --threads 4 --report {output.wgv_kraken_report} --output {output.wgv_kraken_output} {input.contigs_file}/contigs.fa
+
+        bracken -i {output.wgv_kraken_report} -d /workspace/Gene-pipeline/databases/k2/minikraken2_v2_8GB_201904_UPDATE\
+         -o {output.wgv_bracken_output}
 
         """
+rule whole_genome_validation:
+    input:
+        bracken_output =  os.path.join(output_dir, "wgkb", "{id}", "{id}.bracken_output.txt"),
+    params:
+        specie = lambda wildcards: config["Samples"][wildcards.id[:7]]["specie"],
+        sample_id = lambda wildcards: wildcards.id
+    output:
+        wgv_sample_validation_output = os.path.join(output_dir, "wgv", "{id}.validation_output.txt")
+    shell:
+        """
+            python samp_val.py --input {input.bracken_output} --output {output.wgv_sample_validation_output} {params.specie} {params.sample_id}  
+        """
+
+    
+
             
     
     
