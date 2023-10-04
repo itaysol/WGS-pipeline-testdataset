@@ -1,5 +1,5 @@
-import pandas as pd
 import os
+import pandas as pd
 import sys
 # BRACKEN_TXT = r"bracken.txt"
 
