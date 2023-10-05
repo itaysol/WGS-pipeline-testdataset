@@ -4,11 +4,10 @@ import sys
 # BRACKEN_TXT = r"bracken.txt"
 
 
-def main(input_file, organism, sampleid) -> None:
+def main(input_file, organism, sampleid, output_path) -> None:
     current_directory = os.getcwd()
-    file_name = 'output/sample_validation/'+sampleid+'.output.txt'
+    file_name = output_path
     output_path = os.path.join(current_directory, file_name)
-    
     data = pd.read_csv(input_file, delimiter='\t')
     data = data.iloc[:, [0, -1]]
     other_species_criteria = True
@@ -48,7 +47,8 @@ if __name__ == '__main__':
     BRACKEN_TXT = sys.argv[2]
     specie = sys.argv[5]+" "+ sys.argv[6]
     sample_id = sys.argv[7]
-    main(BRACKEN_TXT, specie, sample_id)
+    output_path = sys.argv[4]
+    main(BRACKEN_TXT, specie, sample_id, output_path)
 
 
 
