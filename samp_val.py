@@ -27,7 +27,7 @@ def main(input_file, organism, sampleid, output_path) -> None:
     if my_specie_criteria and other_species_criteria:
         with open(output_path, 'w') as output_file:
             output_file.write(sampleid + '. PASSED.\n\n')
-    elif my_abundance < 0.7:
+    elif not my_abundance.empty and my_abundance < 0.7:
         with open(output_path, 'w') as output_file:
             output_file.write(sampleid + '. FAILED. ' + organism + ' abundance is less than 0.7\n\n')
     elif not other_species_criteria:
