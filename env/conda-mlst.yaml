@@ -1,0 +1,11 @@
+name: gene-pipeline-mlst
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - mlst
+  - curl
+  - jq
+
+  

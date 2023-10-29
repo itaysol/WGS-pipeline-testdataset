@@ -20,11 +20,13 @@ rule all:
         expand("output/kraken/{sample}/{sample}.kraken_output.txt", sample = config["Samples"].keys()),
         expand("output/bracken/{sample}.bracken_output.tsv", sample = config["Samples"].keys()),
         expand("output/sample_validation/{sample}.output.txt", sample = config["Samples"].keys()),
-        expand("output/assembly/{sample}", sample = config["Samples"].keys()),
+        expand("output/assembly/{sample}_assembly", sample = config["Samples"].keys()),
         expand("output/wgkb/{sample}/{sample}.kraken_taxonomy.txt", sample = config["Samples"].keys()),
         expand("output/wgkb/{sample}/{sample}.kraken_output.txt", sample = config["Samples"].keys()),
         expand("output/wgkb/{sample}/{sample}.bracken_output.txt", sample = config["Samples"].keys()),
-       # expand("output/wgv/{sample}/{sample}.validation_output.txt", sample = config["Samples"].keys())
+        expand("output/wgv/{sample}/{sample}.validation_output.txt", sample = config["Samples"].keys()),
+        expand("output/mlst/{sample}/{sample}.contigs.mlst.tsv", sample = config["Samples"].keys()),
+        expand("output/rmlst/{sample}.tsv", sample = config["Samples"].keys())
         
 
 
@@ -57,12 +59,12 @@ rule run_kraken2:
         clean_fwd=lambda wildcards: os.path.join(output_dir, "fastq", wildcards.id, f"{wildcards.id}.clean_1.fastq.gz"),
         clean_rev=lambda wildcards: os.path.join(output_dir, "fastq", wildcards.id, f"{wildcards.id}.clean_2.fastq.gz")
     output:
-        kraken_report = temporary(os.path.join(output_dir, "kraken", "{id}", "{id}.kraken_taxonomy.txt")),
-        kraken_output = temporary(os.path.join(output_dir, "kraken", "{id}", "{id}.kraken_output.txt")),
+        kraken_report = os.path.join(output_dir, "kraken", "{id}", "{id}.kraken_taxonomy.txt"),
+        kraken_output = os.path.join(output_dir, "kraken", "{id}", "{id}.kraken_output.txt"),
     threads: 4
     shell:
         """
-        kraken2 --db /workspace/Gene-pipeline/databases/k2/minikraken2_v2_8GB_201904_UPDATE --threads 4 --report {output.kraken_report} --output {output.kraken_output} \
+        kraken2 --db /workspace/Gene-pipeline/databases/k2 --threads 4 --report {output.kraken_report} --output {output.kraken_output} \
             --paired {input.clean_fwd} {input.clean_rev}
         """
 
@@ -72,10 +74,10 @@ rule run_bracken:
     input:
        kraken_report_file= lambda wildcards: os.path.join(output_dir, "kraken", wildcards.id, f"{wildcards.id}.kraken_taxonomy.txt")
     output:
-        bracken_output= temporary(os.path.join(output_dir, "bracken", "{id}.bracken_output.tsv"))
+        bracken_output= os.path.join(output_dir, "bracken", "{id}.bracken_output.tsv")
     shell:
         """
-            bracken -i {input.kraken_report_file} -d /workspace/Gene-pipeline/databases/k2/minikraken2_v2_8GB_201904_UPDATE -o {output.bracken_output}
+            bracken -i {input.kraken_report_file} -d /workspace/Gene-pipeline/databases/k2 -o {output.bracken_output}
             
         """
 
@@ -101,10 +103,10 @@ rule assembly:
         clean_fwd = os.path.join(output_dir, "fastq", "{id}", "{id}.clean_1.fastq.gz"),
         clean_rev = os.path.join(output_dir, "fastq", "{id}", "{id}.clean_1.fastq.gz"),
     output:
-        assembly_output = directory("output/assembly/{id}")
+        assembly_output = directory("output/assembly/{id}_assembly")
     shell:
         """
-        shovill --trim --R1 {input.clean_fwd} --R2 {input.clean_rev} --outdir {output.assembly_output} 
+        shovill --R1 {input.clean_fwd} --R2 {input.clean_rev} --outdir {output.assembly_output} --assembler skesa
         
         """
 
@@ -112,7 +114,7 @@ rule whole_genome_krak_brack:
     conda:
         "env/conda-whole_genome_validation.yaml"
     input:
-        contigs_file = os.path.join(output_dir, "assembly", "{id}")
+        contigs_file = os.path.join(output_dir, "assembly", "{id}_assembly")
     output:
         wgv_kraken_report = os.path.join(output_dir, "wgkb", "{id}", "{id}.kraken_taxonomy.txt"),
         wgv_kraken_output = os.path.join(output_dir, "wgkb", "{id}", "{id}.kraken_output.txt"),
@@ -123,10 +125,10 @@ rule whole_genome_krak_brack:
         sample_id = lambda wildcards: wildcards.id
     shell:
         """
-        kraken2 --db /workspace/Gene-pipeline/databases/k2/minikraken2_v2_8GB_201904_UPDATE \
+        kraken2 --db /workspace/Gene-pipeline/databases/k2 \
          --threads 4 --report {output.wgv_kraken_report} --output {output.wgv_kraken_output} {input.contigs_file}/contigs.fa
 
-        bracken -i {output.wgv_kraken_report} -d /workspace/Gene-pipeline/databases/k2/minikraken2_v2_8GB_201904_UPDATE\
+        bracken -i {output.wgv_kraken_report} -d /workspace/Gene-pipeline/databases/k2\
          -o {output.wgv_bracken_output}
 
         """
@@ -141,7 +143,26 @@ rule whole_genome_validation:
     shell:
         """
             python samp_val.py --input {input.bracken_output} --output {output.wgv_sample_validation_output} {params.specie} {params.sample_id}  
+    
         """
+rule run_mlst:
+    conda:
+        "env/conda-mlst.yaml"
+    input:
+        contigs_file = os.path.join(output_dir, "assembly", "{id}_assembly")
+    output:
+        mlst_output = os.path.join(output_dir, "mlst", "{id}", "{id}.contigs.mlst.tsv"),
+        rmlst_output = os.path.join(output_dir, "rmlst", "{id}.tsv")
+    shell:
+        """
+        mlst {input.contigs_file}/contigs.fa > {output.mlst_output}
+        bash ./rMLST/rmlst.sh {input.contigs_file}/contigs.fa > {output.rmlst_output}
+        
+        """
+
+
+
+
 
     
 
