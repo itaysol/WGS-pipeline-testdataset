@@ -26,7 +26,9 @@ rule all:
         expand("output/wgkb/{sample}/{sample}.bracken_output.txt", sample = config["Samples"].keys()),
         expand("output/wgv/{sample}/{sample}.validation_output.txt", sample = config["Samples"].keys()),
         expand("output/mlst/{sample}/{sample}.contigs.mlst.tsv", sample = config["Samples"].keys()),
-        expand("output/rmlst/{sample}.tsv", sample = config["Samples"].keys())
+        expand("output/rmlst/{sample}.tsv", sample = config["Samples"].keys()),
+        expand("output/abricate/{sample}/{sample}.abricate.card.tsv", sample = config["Samples"].keys()),
+        expand("output/AMR/{sample}.amrfinderplus.tsv", sample = config["Samples"].keys())
         
 
 
@@ -159,8 +161,23 @@ rule run_mlst:
         bash ./rMLST/rmlst.sh {input.contigs_file}/contigs.fa > {output.rmlst_output}
         
         """
-
-
+rule resistome_and_virulome:
+    conda:
+        "env/conda-resistome_and_virulome.yaml"
+    input:
+        contigs_file = os.path.join(output_dir, "assembly", "{id}_assembly"),
+        database_setup = os.path.join(output_dir,"amrfinder.setup")
+    output:
+        abricate_card = os.path.join(output_dir,"abricate","{id}","{id}.abricate.card.tsv"),
+        abricate_vfdb = os.path.join(output_dir,"abricate","{id}.abricate.vfdb.tsv"),
+        AMR = os.path.join(output_dir,"AMR","{id}.amrfinderplus.tsv")
+    shell:
+        """
+        abricate --db card --minid 60 --mincov 60 {input.contigs_file}/contigs.fa > {output.abricate_card}
+        abricate --db vfdb --minid 60 --mincov 60 {input.contigs_file}/contigs.fa > {output.abricate_vfdb}
+        amrfinder --nucleotide {input.contigs_file}/contigs.fa --plus --threads 4 -o {output.AMR}
+        
+        """
 
 
 

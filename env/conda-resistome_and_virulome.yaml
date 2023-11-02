@@ -1,0 +1,9 @@
+name: gene-pipeline-resistome-and-virulome
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+  - anaconda
+dependencies:
+  - bioconda::abricate
+  - bioconda::ncbi-amrfinderplus
