@@ -166,7 +166,6 @@ rule resistome_and_virulome:
         "env/conda-resistome_and_virulome.yaml"
     input:
         contigs_file = os.path.join(output_dir, "assembly", "{id}_assembly"),
-        database_setup = os.path.join(output_dir,"amrfinder.setup")
     output:
         abricate_card = os.path.join(output_dir,"abricate","{id}","{id}.abricate.card.tsv"),
         abricate_vfdb = os.path.join(output_dir,"abricate","{id}.abricate.vfdb.tsv"),
