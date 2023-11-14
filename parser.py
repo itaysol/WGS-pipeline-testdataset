@@ -41,3 +41,13 @@ def setConfigFile(file_path):
 def parser(file_path):
     return setConfigFile(file_path)
 
+def setComparisonGroups(file_path):
+#    comparisonGroupsList = [sample.get('comparisonGroup') for sample in file_path['Samples']]
+    comparisonGroupDict = []
+    for sample,sample_val in zip(file_path['Samples'],file_path['Samples'].values()):
+        comparisonGroupDict.append((sample_val.get('comparisonGroup'),sample))
+    return comparisonGroupDict
+
+
+
+

@@ -3,13 +3,17 @@ import sys
 from snakemake.io import glob_wildcards
 import yaml
 import csv
-from parser import parser
+import itertools
+from parser import parser,setComparisonGroups
 
 
 configfile : parser(config["file"])
+comparisonGroupTuples = setComparisonGroups(config)
+
 
 # Define the output directory
 output_dir = "output"
+
 
 # Define the final rule that specifies the targets to generate
 rule all:
@@ -20,15 +24,15 @@ rule all:
         expand("output/kraken/{sample}/{sample}.kraken_output.txt", sample = config["Samples"].keys()),
         expand("output/bracken/{sample}.bracken_output.tsv", sample = config["Samples"].keys()),
         expand("output/sample_validation/{sample}.output.txt", sample = config["Samples"].keys()),
-        expand("output/assembly/{sample}_assembly", sample = config["Samples"].keys()),
-        expand("output/wgkb/{sample}/{sample}.kraken_taxonomy.txt", sample = config["Samples"].keys()),
-        expand("output/wgkb/{sample}/{sample}.kraken_output.txt", sample = config["Samples"].keys()),
-        expand("output/wgkb/{sample}/{sample}.bracken_output.txt", sample = config["Samples"].keys()),
+        expand("output/assembly/comparisonGroup{comparisonGroup}/{sample}_assembly", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
+        expand("output/wgkb/comparisonGroup{comparisonGroup}/{sample}/{sample}.kraken_taxonomy.txt", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
+        expand("output/wgkb/comparisonGroup{comparisonGroup}/{sample}/{sample}.kraken_output.txt", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
+        expand("output/wgkb/comparisonGroup{comparisonGroup}/{sample}/{sample}.bracken_output.txt", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
         expand("output/wgv/{sample}/{sample}.validation_output.txt", sample = config["Samples"].keys()),
-        expand("output/mlst/{sample}/{sample}.contigs.mlst.tsv", sample = config["Samples"].keys()),
-        expand("output/rmlst/{sample}.tsv", sample = config["Samples"].keys()),
-        expand("output/abricate/{sample}/{sample}.abricate.card.tsv", sample = config["Samples"].keys()),
-        expand("output/AMR/{sample}.amrfinderplus.tsv", sample = config["Samples"].keys())
+        expand("output/mlst/comparisonGroup{comparisonGroup}/{sample}/{sample}.contigs.mlst.tsv", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
+        expand("output/rmlst/comparisonGroup{comparisonGroup}/{sample}.tsv", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
+        expand("output/abricate/comparisonGroup{comparisonGroup}/{sample}/{sample}.abricate.card.tsv", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
+        expand("output/AMR/comparisonGroup{comparisonGroup}/{sample}.amrfinderplus.tsv", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
         
 
 
@@ -66,7 +70,7 @@ rule run_kraken2:
     threads: 4
     shell:
         """
-        kraken2 --db /workspace/Gene-pipeline/databases/k2 --threads 4 --report {output.kraken_report} --output {output.kraken_output} \
+        kraken2 --db /workspace/WGS-pipeline/databases/k2 --threads 4 --report {output.kraken_report} --output {output.kraken_output} \
             --paired {input.clean_fwd} {input.clean_rev}
         """
 
@@ -79,7 +83,7 @@ rule run_bracken:
         bracken_output= os.path.join(output_dir, "bracken", "{id}.bracken_output.tsv")
     shell:
         """
-            bracken -i {input.kraken_report_file} -d /workspace/Gene-pipeline/databases/k2 -o {output.bracken_output}
+            bracken -i {input.kraken_report_file} -d /workspace/WGS-pipeline/databases/k2 -o {output.bracken_output}
             
         """
 
@@ -104,10 +108,13 @@ rule assembly:
     input:
         clean_fwd = os.path.join(output_dir, "fastq", "{id}", "{id}.clean_1.fastq.gz"),
         clean_rev = os.path.join(output_dir, "fastq", "{id}", "{id}.clean_1.fastq.gz"),
+    params:
+        comparisonGroup = lambda wildcards: config["Samples"][wildcards.id[:7]]["comparisonGroup"]
     output:
-        assembly_output = directory("output/assembly/{id}_assembly")
+        assembly_output = directory("output/assembly/{comparisonGroup}/{id}_assembly")
     shell:
         """
+        echo Comparison Group: {params.comparisonGroup}
         shovill --R1 {input.clean_fwd} --R2 {input.clean_rev} --outdir {output.assembly_output} --assembler skesa
         
         """
@@ -115,22 +122,22 @@ rule assembly:
 rule whole_genome_krak_brack:
     conda:
         "env/conda-whole_genome_validation.yaml"
-    input:
-        contigs_file = os.path.join(output_dir, "assembly", "{id}_assembly")
-    output:
-        wgv_kraken_report = os.path.join(output_dir, "wgkb", "{id}", "{id}.kraken_taxonomy.txt"),
-        wgv_kraken_output = os.path.join(output_dir, "wgkb", "{id}", "{id}.kraken_output.txt"),
-        wgv_bracken_output = os.path.join(output_dir, "wgkb", "{id}", "{id}.bracken_output.txt"),
-        
     params:
+       # comparisonGroup = lambda wildcards: config["Samples"][wildcards.id[:7]]["comparisonGroup"],
         specie = lambda wildcards: config["Samples"][wildcards.id[:7]]["specie"],
         sample_id = lambda wildcards: wildcards.id
+    input:
+        contigs_file = os.path.join(output_dir, "assembly","{comparisonGroup}","{id}_assembly")
+    output:
+        wgv_kraken_report = os.path.join(output_dir, "wgkb","{comparisonGroup}" ,"{id}", "{id}.kraken_taxonomy.txt"),
+        wgv_kraken_output = os.path.join(output_dir, "wgkb","{comparisonGroup}", "{id}", "{id}.kraken_output.txt"),
+        wgv_bracken_output = os.path.join(output_dir, "wgkb", "{comparisonGroup}","{id}", "{id}.bracken_output.txt"),
     shell:
         """
-        kraken2 --db /workspace/Gene-pipeline/databases/k2 \
+        kraken2 --db /workspace/WGS-pipeline/databases/k2 \
          --threads 4 --report {output.wgv_kraken_report} --output {output.wgv_kraken_output} {input.contigs_file}/contigs.fa
 
-        bracken -i {output.wgv_kraken_report} -d /workspace/Gene-pipeline/databases/k2\
+        bracken -i {output.wgv_kraken_report} -d /workspace/WGS-pipeline/databases/k2\
          -o {output.wgv_bracken_output}
 
         """
@@ -150,11 +157,13 @@ rule whole_genome_validation:
 rule run_mlst:
     conda:
         "env/conda-mlst.yaml"
+    params:
+        comparisonGroup = lambda wildcards: config["Samples"][wildcards.id[:7]]["comparisonGroup"]
     input:
-        contigs_file = os.path.join(output_dir, "assembly", "{id}_assembly")
+        contigs_file = os.path.join(output_dir, "assembly","{comparisonGroup}", "{id}_assembly")
     output:
-        mlst_output = os.path.join(output_dir, "mlst", "{id}", "{id}.contigs.mlst.tsv"),
-        rmlst_output = os.path.join(output_dir, "rmlst", "{id}.tsv")
+        mlst_output = os.path.join(output_dir, "mlst","{comparisonGroup}", "{id}", "{id}.contigs.mlst.tsv"),
+        rmlst_output = os.path.join(output_dir, "rmlst", "{comparisonGroup}","{id}.tsv")
     shell:
         """
         mlst {input.contigs_file}/contigs.fa > {output.mlst_output}
@@ -164,16 +173,19 @@ rule run_mlst:
 rule resistome_and_virulome:
     conda:
         "env/conda-resistome_and_virulome.yaml"
+    params:
+        comparisonGroup = lambda wildcards: config["Samples"][wildcards.id[:7]]["comparisonGroup"]
     input:
-        contigs_file = os.path.join(output_dir, "assembly", "{id}_assembly"),
+        contigs_file = os.path.join(output_dir, "assembly","{comparisonGroup}","{id}_assembly"),
     output:
-        abricate_card = os.path.join(output_dir,"abricate","{id}","{id}.abricate.card.tsv"),
-        abricate_vfdb = os.path.join(output_dir,"abricate","{id}.abricate.vfdb.tsv"),
-        AMR = os.path.join(output_dir,"AMR","{id}.amrfinderplus.tsv")
+        abricate_card = os.path.join(output_dir,"abricate","{comparisonGroup}","{id}","{id}.abricate.card.tsv"),
+        abricate_vfdb = os.path.join(output_dir,"abricate","{comparisonGroup}","{id}.abricate.vfdb.tsv"),
+        AMR = os.path.join(output_dir,"AMR","{comparisonGroup}","{id}.amrfinderplus.tsv")
     shell:
         """
         abricate --db card --minid 60 --mincov 60 {input.contigs_file}/contigs.fa > {output.abricate_card}
         abricate --db vfdb --minid 60 --mincov 60 {input.contigs_file}/contigs.fa > {output.abricate_vfdb}
+        amrfinder -u
         amrfinder --nucleotide {input.contigs_file}/contigs.fa --plus --threads 4 -o {output.AMR}
         
         """
