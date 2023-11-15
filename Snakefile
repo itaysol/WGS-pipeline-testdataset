@@ -13,7 +13,6 @@ configfile : parser(config["file"])
 comparisonGroupTuples = setComparisonGroups(config)
 
 # Define the output directory
-output_dir = "output"
 timeStamp = datetime.now().strftime("%Y.%m.%d,%H:%M:%S")
 output_dir = "output"+timeStamp
 
