@@ -1,87 +1,0 @@
-[shovill] Hello gitpod
-[shovill] You ran: /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/shovill --R1 output2023.11.15,10:46:43/fastq/sample3/sample3.clean_fwd.fastq.gz --R2 output2023.11.15,10:46:43/fastq/sample3/sample3.clean_rev.fastq.gz --outdir output2023.11.15,10:46:43/assembly/comparisonGroup1/sample3_assembly --assembler skesa
-[shovill] This is shovill 1.1.0
-[shovill] Written by Torsten Seemann
-[shovill] Homepage is https://github.com/tseemann/shovill
-[shovill] Operating system is linux
-[shovill] Perl version is v5.32.1
-[shovill] Machine has 16 CPU cores and 62.79 GB RAM
-[shovill] Using bwa - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/bwa | Version: 0.7.17-r1188
-[shovill] Using flash - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/flash | FLASH v1.2.11
-[shovill] Using java - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/java | openjdk version "21.0.1-internal" 2023-10-17
-[shovill] Using kmc - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/kmc | K-Mer Counter (KMC) ver. 3.2.1 (2022-01-04)
-[shovill] Using lighter - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/lighter | Lighter v1.1.2
-[shovill] Using megahit - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/megahit | MEGAHIT v1.2.9
-[shovill] Using megahit_toolkit - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/megahit_toolkit | v1.2.9
-[shovill] Using pigz - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/pigz | pigz 2.8
-[shovill] Using pilon - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/pilon | Picked up JAVA_TOOL_OPTIONS:  -Xmx3489m
-[shovill] Using samclip - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/samclip | samclip 0.4.0
-[shovill] Using samtools - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/samtools | Version: 1.18 (using htslib 1.18)
-[shovill] Using seqtk - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/seqtk | Version: 1.4-r122
-[shovill] Using skesa - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/skesa | SKESA 2.5.1
-[shovill] Using spades.py - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/spades.py | SPAdes genome assembler v3.15.5
-[shovill] Using trimmomatic - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/trimmomatic | Picked up JAVA_TOOL_OPTIONS:  -Xmx3489m
-[shovill] Using velvetg - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/velvetg | Version 1.2.10
-[shovill] Using velveth - /workspace/WGS-pipeline/.snakemake/conda/d5d1f280e1fdc94e65328becf11e446d_/bin/velveth | Version 1.2.10
-[shovill] Found spades version: 003015000
-[shovill] Using tempdir: /tmp
-[shovill] Changing into folder: /workspace/WGS-pipeline/output2023.11.15,10:46:43/assembly/comparisonGroup1/sample3_assembly
-[shovill] Collecting raw read statistics with 'seqtk'
-[shovill] Running: seqtk fqchk -q3 \/workspace\/WGS\-pipeline\/output2023\.11\.15\,10\:46\:43\/fastq\/sample3\/sample3\.clean_fwd\.fastq\.gz >/tmp/vZimqX5XA8 2>&1 | sed 's/^/[seqtk] /' | tee -a shovill.log
-[shovill] Read stats: total_bp = 1831988310
-[shovill] Read stats: avg_len = 295
-[shovill] Read stats: min_len = 31
-[shovill] Read stats: max_len = 301
-[shovill] Estimating genome size by counting unqiue 21-mers > frequency 10 
-[shovill] Running: kmc -sm -m8 -t8 -k21 -ci10 \/workspace\/WGS\-pipeline\/output2023\.11\.15\,10\:46\:43\/fastq\/sample3\/sample3\.clean_fwd\.fastq\.gz /tmp/wELcgWNaTh/kmc /tmp/wELcgWNaTh 2>&1 | sed 's/^/[kmc] /' | tee -a shovill.log
-[kmc] **********************
-[kmc] Stage 1: 0%Stage 1: 34%Stage 1: 68%Stage 1: 100%
-[kmc] Stage 2: 0%Stage 2: 2%Stage 2: 3%Stage 2: 4%Stage 2: 5%Stage 2: 6%Stage 2: 7%Stage 2: 8%Stage 2: 9%Stage 2: 10%Stage 2: 11%Stage 2: 12%Stage 2: 13%Stage 2: 14%Stage 2: 15%Stage 2: 16%Stage 2: 17%Stage 2: 18%Stage 2: 19%Stage 2: 20%Stage 2: 21%Stage 2: 22%Stage 2: 23%Stage 2: 24%Stage 2: 25%Stage 2: 26%Stage 2: 27%Stage 2: 28%Stage 2: 29%Stage 2: 30%Stage 2: 31%Stage 2: 32%Stage 2: 33%Stage 2: 34%Stage 2: 35%Stage 2: 36%Stage 2: 37%Stage 2: 38%Stage 2: 39%Stage 2: 40%Stage 2: 41%Stage 2: 42%Stage 2: 43%Stage 2: 44%Stage 2: 45%Stage 2: 46%Stage 2: 47%Stage 2: 48%Stage 2: 49%Stage 2: 50%Stage 2: 51%Stage 2: 52%Stage 2: 53%Stage 2: 54%Stage 2: 55%Stage 2: 56%Stage 2: 57%Stage 2: 58%Stage 2: 59%Stage 2: 60%Stage 2: 61%Stage 2: 62%Stage 2: 63%Stage 2: 64%Stage 2: 65%Stage 2: 66%Stage 2: 67%Stage 2: 68%Stage 2: 69%Stage 2: 70%Stage 2: 71%Stage 2: 72%Stage 2: 73%Stage 2: 74%Stage 2: 75%Stage 2: 76%Stage 2: 77%Stage 2: 78%Stage 2: 79%Stage 2: 80%Stage 2: 81%Stage 2: 82%Stage 2: 83%Stage 2: 84%Stage 2: 85%Stage 2: 86%Stage 2: 87%Stage 2: 88%Stage 2: 89%Stage 2: 90%Stage 2: 91%Stage 2: 92%Stage 2: 93%Stage 2: 94%Stage 2: 95%Stage 2: 96%Stage 2: 97%Stage 2: 98%Stage 2: 99%Stage 2: 100%
-[kmc] 
-[kmc] 
-[kmc] 1st stage: 15.0083s
-[kmc] 2nd stage: 31.2058s
-[kmc] 3rd stage: 0.380329s
-[kmc] Total    : 46.5944s
-[kmc] Tmp size : 1061MB
-[kmc] Tmp size strict memory : 0MB
-[kmc] Tmp total: 1061MB
-[kmc] 
-[kmc] Stats:
-[kmc]    No. of k-mers below min. threshold :     28964315
-[kmc]    No. of k-mers above max. threshold :            0
-[kmc]    No. of unique k-mers               :     30016422
-[kmc]    No. of unique counted k-mers       :      1052107
-[kmc]    Total no. of k-mers                :    853900855
-[kmc]    Total no. of reads                 :      3104665
-[kmc]    Total no. of super-k-mers          :    129751330
-[shovill] Using genome size 1052107 bp
-[shovill] Estimated sequencing depth: 1741 x
-[shovill] Subsampling reads by factor 0.086 to get from 1741x to 150x
-[shovill] Running: seqtk sample \/workspace\/WGS\-pipeline\/output2023\.11\.15\,10\:46\:43\/fastq\/sample3\/sample3\.clean_fwd\.fastq\.gz 0.086 | pigz --fast -c -p 8 > R1.sub.fq.gz 2>&1 | sed 's/^/[seqtk] /' | tee -a shovill.log
-[shovill] Running: seqtk sample \/workspace\/WGS\-pipeline\/output2023\.11\.15\,10\:46\:43\/fastq\/sample3\/sample3\.clean_rev\.fastq\.gz 0.086 | pigz --fast -c -p 8 > R2.sub.fq.gz 2>&1 | sed 's/^/[seqtk] /' | tee -a shovill.log
-[shovill] Appending -Xmx16g to _JAVA_OPTIONS
-[shovill] Running: ln -sf R1\.sub\.fq\.gz R1.fq.gz 2>&1 | sed 's/^/[ln] /' | tee -a shovill.log
-[shovill] Running: ln -sf R2\.sub\.fq\.gz R2.fq.gz 2>&1 | sed 's/^/[ln] /' | tee -a shovill.log
-[shovill] Average read length looks like 295 bp
-[shovill] Automatically setting --minlen to 147
-[shovill] Setting k-mer range to (31 .. 127)
-[shovill] Estimated K-mers: 31 55 79 103 127 [kn=5, ks=24, kmin=31, kmax=127]
-[shovill] Using kmers: 31,55,79,103,127
-[shovill] Correcting reads with 'Lighter'
-[shovill] Running: lighter -od . -r R1.fq.gz -r R2.fq.gz -K 32 1052107 -t 8 -maxcor 1 2>&1 | sed 's/^/[lighter] /' | tee -a shovill.log
-[lighter] [2023-11-15 10:48:32] =============Start====================
-[lighter] [2023-11-15 10:48:32] Scanning the input files to infer alpha(sampling rate)
-[lighter] [2023-11-15 10:48:33] Average coverage is 149.311 and alpha is 0.047
-[lighter] [2023-11-15 10:48:35] Bad quality threshold is "("
-[lighter] [2023-11-15 10:48:38] Finish sampling kmers
-[lighter] [2023-11-15 10:48:38] Bloom filter A's false positive rate: 0.014908
-[lighter] [2023-11-15 10:48:54] Finish storing trusted kmers
-[lighter] [2023-11-15 10:49:05] Finish error correction
-[lighter] Processed 532544 reads:
-[lighter] 	168568 are error-free
-[lighter] 	Corrected 447370 bases(1.229120 corrections for reads with errors)
-[lighter] 	Trimmed 0 reads with average trimmed bases 0.000000
-[lighter] 	Discard 0 reads
-[shovill] Overlapping/stitching PE reads with 'FLASH'
-[shovill] Running: flash -m 20 -M 301 -d . -o flash -z -t 8 R1.cor.fq.gz R2.cor.fq.gz 2>&1 | sed 's/^//' | tee -a shovill.log
