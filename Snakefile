@@ -4,38 +4,37 @@ from snakemake.io import glob_wildcards
 import yaml
 import csv
 import itertools
-from parser import parser,setComparisonGroups
+from scripts.parser import *
+from datetime import datetime
+
 
 
 configfile : parser(config["file"])
 comparisonGroupTuples = setComparisonGroups(config)
 
-
 # Define the output directory
-output_dir = "output"
-
+timeStamp = datetime.now().strftime("%Y.%m.%d,%H:%M:%S")
+output_dir = "output"+timeStamp
 
 # Define the final rule that specifies the targets to generate
 rule all:
     input:
-        expand("output/fastq/{sample}/{sample}.clean_1.fastq.gz", sample = config["Samples"].keys()),
-        expand("output/fastq/{sample}/{sample}.clean_2.fastq.gz", sample = config["Samples"].keys()),
-        expand("output/kraken/{sample}/{sample}.kraken_taxonomy.txt", sample = config["Samples"].keys()),
-        expand("output/kraken/{sample}/{sample}.kraken_output.txt", sample = config["Samples"].keys()),
-        expand("output/bracken/{sample}.bracken_output.tsv", sample = config["Samples"].keys()),
-        expand("output/sample_validation/{sample}.output.txt", sample = config["Samples"].keys()),
-        expand("output/assembly/comparisonGroup{comparisonGroup}/{sample}_assembly", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
-        expand("output/wgkb/comparisonGroup{comparisonGroup}/{sample}/{sample}.kraken_taxonomy.txt", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
-        expand("output/wgkb/comparisonGroup{comparisonGroup}/{sample}/{sample}.kraken_output.txt", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
-        expand("output/wgkb/comparisonGroup{comparisonGroup}/{sample}/{sample}.bracken_output.txt", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
-        expand("output/wgv/{sample}/{sample}.validation_output.txt", sample = config["Samples"].keys()),
-        expand("output/mlst/comparisonGroup{comparisonGroup}/{sample}/{sample}.contigs.mlst.tsv", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
-        expand("output/rmlst/comparisonGroup{comparisonGroup}/{sample}.tsv", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
-        expand("output/abricate/comparisonGroup{comparisonGroup}/{sample}/{sample}.abricate.card.tsv", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
-        expand("output/AMR/comparisonGroup{comparisonGroup}/{sample}.amrfinderplus.tsv", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
+        expand(output_dir+"/fastq/{sample}/{sample}.clean_fwd.fastq.gz", sample = config["Samples"].keys()),
+        expand(output_dir+"/fastq/{sample}/{sample}.clean_rev.fastq.gz", sample = config["Samples"].keys()),
+        expand(output_dir+"/kraken/{sample}/{sample}.kraken_taxonomy.txt", sample = config["Samples"].keys()),
+        expand(output_dir+"/kraken/{sample}/{sample}.kraken_output.txt", sample = config["Samples"].keys()),
+        expand(output_dir+"/bracken/{sample}.bracken_output.tsv", sample = config["Samples"].keys()),
+        expand(output_dir+"/sample_validation/{sample}.output.txt", sample = config["Samples"].keys()),
+        expand(output_dir+"/assembly/comparisonGroup{comparisonGroup}/{sample}_assembly", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
+        expand(output_dir+"/wgkb/comparisonGroup{comparisonGroup}/{sample}/{sample}.kraken_taxonomy.txt", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
+        expand(output_dir+"/wgkb/comparisonGroup{comparisonGroup}/{sample}/{sample}.kraken_output.txt", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
+        expand(output_dir+"/wgkb/comparisonGroup{comparisonGroup}/{sample}/{sample}.bracken_output.txt", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
+        expand(output_dir+"/wgv/{sample}/{sample}.validation_output.txt", sample = config["Samples"].keys()),
+        expand(output_dir+"/mlst/comparisonGroup{comparisonGroup}/{sample}/{sample}.contigs.mlst.tsv", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
+        expand(output_dir+"/rmlst/comparisonGroup{comparisonGroup}/{sample}.tsv", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
+        expand(output_dir+"/abricate/comparisonGroup{comparisonGroup}/{sample}/{sample}.abricate.card.tsv", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
+        expand(output_dir+"/AMR/comparisonGroup{comparisonGroup}/{sample}.amrfinderplus.tsv", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
         
-
-
 rule process_file_pair:
     conda:
         "env/conda-qc.yaml"
@@ -45,16 +44,16 @@ rule process_file_pair:
         fwd = lambda wildcards: config["Samples"][wildcards.id[:7]]["R1Fastq"],
         rev = lambda wildcards: config["Samples"][wildcards.id[:7]]["R2Fastq"]
     output:
-        r1_clean = temporary(os.path.join(output_dir, "fastq/{id}/{id}.clean_1.fastq.gz")),
-        r2_clean = temporary(os.path.join(output_dir, "fastq/{id}/{id}.clean_2.fastq.gz")),
+        r1_clean = os.path.join(output_dir, "fastq/{id}/{id}.clean_fwd.fastq.gz"),
+        r2_clean = os.path.join(output_dir, "fastq/{id}/{id}.clean_rev.fastq.gz"),
         html = temporary(os.path.join(output_dir, "fastq/{id}/{id}.fastp.html")),
         json = temporary(os.path.join(output_dir, "fastq/{id}/{id}.fastp.json"))
     log:
-        "output/fastq/{id}/{id}.fastp.log.txt"
+        output_dir+"/fastq/{id}/{id}.fastp.log.txt"
     shell:
         """
         fastp -i {input.fwd} -I {input.rev} \
-              -o {output.r1_clean} -O {output.r2_clean} \
+              --out1 {output.r1_clean} --out2 {output.r2_clean} \
               -w 3 -h {output.html} -j {output.json}
         """
 
@@ -62,8 +61,8 @@ rule run_kraken2:
     conda:
         "env/conda-kraken2.yaml"
     input:
-        clean_fwd=lambda wildcards: os.path.join(output_dir, "fastq", wildcards.id, f"{wildcards.id}.clean_1.fastq.gz"),
-        clean_rev=lambda wildcards: os.path.join(output_dir, "fastq", wildcards.id, f"{wildcards.id}.clean_2.fastq.gz")
+        clean_fwd=lambda wildcards: os.path.join(output_dir, "fastq", wildcards.id, f"{wildcards.id}.clean_fwd.fastq.gz"),
+        clean_rev=lambda wildcards: os.path.join(output_dir, "fastq", wildcards.id, f"{wildcards.id}.clean_rev.fastq.gz")
     output:
         kraken_report = os.path.join(output_dir, "kraken", "{id}", "{id}.kraken_taxonomy.txt"),
         kraken_output = os.path.join(output_dir, "kraken", "{id}", "{id}.kraken_output.txt"),
@@ -98,7 +97,7 @@ rule sample_validation:
         sample_id = lambda wildcards: wildcards.id
     shell:    
          """
-         python samp_val.py --input {input.bracken_output_file} --output {output.sample_validation_output} {params.specie} {params.sample_id}
+         python scripts/samp_val.py --input {input.bracken_output_file} --output {output.sample_validation_output} {params.specie} {params.sample_id}
          
          """
 
@@ -106,12 +105,12 @@ rule assembly:
     conda:
          "env/conda-assembly.yaml"
     input:
-        clean_fwd = os.path.join(output_dir, "fastq", "{id}", "{id}.clean_1.fastq.gz"),
-        clean_rev = os.path.join(output_dir, "fastq", "{id}", "{id}.clean_1.fastq.gz"),
+        clean_fwd = os.path.join(output_dir, "fastq", "{id}", "{id}.clean_fwd.fastq.gz"),
+        clean_rev = os.path.join(output_dir, "fastq", "{id}", "{id}.clean_rev.fastq.gz"),
     params:
         comparisonGroup = lambda wildcards: config["Samples"][wildcards.id[:7]]["comparisonGroup"]
     output:
-        assembly_output = directory("output/assembly/{comparisonGroup}/{id}_assembly")
+        assembly_output = directory(output_dir+"/assembly/{comparisonGroup}/{id}_assembly")
     shell:
         """
         echo Comparison Group: {params.comparisonGroup}
@@ -123,7 +122,6 @@ rule whole_genome_krak_brack:
     conda:
         "env/conda-whole_genome_validation.yaml"
     params:
-       # comparisonGroup = lambda wildcards: config["Samples"][wildcards.id[:7]]["comparisonGroup"],
         specie = lambda wildcards: config["Samples"][wildcards.id[:7]]["specie"],
         sample_id = lambda wildcards: wildcards.id
     input:
@@ -151,7 +149,7 @@ rule whole_genome_validation:
         wgv_sample_validation_output = os.path.join(output_dir, "wgv", "{id}.validation_output.txt")
     shell:
         """
-            python samp_val.py --input {input.bracken_output} --output {output.wgv_sample_validation_output} {params.specie} {params.sample_id}  
+            python scripts/samp_val.py --input {input.bracken_output} --output {output.wgv_sample_validation_output} {params.specie} {params.sample_id}  
     
         """
 rule run_mlst:
