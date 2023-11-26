@@ -7,4 +7,5 @@ tasks:
       . /opt/conda/etc/profile.d/conda.sh
       conda activate base
       #mamba install -y -q -c bioconda
-      bash test.data.sh
+      bash tests/test.data.sh
+      bash test/test.db.sh
