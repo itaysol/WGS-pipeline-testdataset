@@ -1,8 +1,9 @@
-name: gene-pipeline-speciesID
+name: gene-pipeline-grapetree
 channels:
   - conda-forge
   - bioconda
   - defaults
   - anaconda
 dependencies:
-  - bioconda::bracken
+  - bioconda::grapetree
+  
