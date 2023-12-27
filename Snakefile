@@ -28,6 +28,7 @@ rule all:
         expand(output_dir+"/bracken/{sample}.bracken_output.tsv", sample = config["Samples"].keys()),
         expand(output_dir+"/sample_validation/{sample}.output.txt", sample = config["Samples"].keys()),
         expand(output_dir+"/assembly/comparisonGroup{comparisonGroup}/{sample}_assembly", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
+        expand(output_dir+"/assemblyContigsOnly/comparisonGroup{comparisonGroup}", comparisonGroup = [item[0] for item in comparisonGroupTuples]),
         expand(output_dir+"/wgkb/comparisonGroup{comparisonGroup}/{sample}/{sample}.kraken_taxonomy.txt", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
         expand(output_dir+"/wgkb/comparisonGroup{comparisonGroup}/{sample}/{sample}.kraken_output.txt", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
         expand(output_dir+"/wgkb/comparisonGroup{comparisonGroup}/{sample}/{sample}.bracken_output.txt", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
@@ -120,8 +121,17 @@ rule assembly:
         assembly_output = directory(output_dir+"/assembly/{comparisonGroup}/{id}_assembly")
     shell:
         """
-        echo Comparison Group: {params.comparisonGroup}
         shovill --R1 {input.clean_fwd} --R2 {input.clean_rev} --outdir {output.assembly_output} --assembler skesa
+        
+        """
+rule create_assembly_groups:
+    input:
+        assembly_comp_group = os.path.join(output_dir,"assembly","comparisonGroup{comparisonGroup}")
+    output:
+        assembly_group_only_contigs = directory(output_dir+"/assemblyContigsOnly/comparisonGroup{comparisonGroup}")
+    shell:
+        """
+        python  scripts/contigsOnly.py {input.assembly_comp_group} {output.assembly_group_only_contigs}
         
         """
 
@@ -208,7 +218,7 @@ rule adhoc_cgMLST:
     conda:
         "env/conda-chewBBACA.yaml"
     input:
-        contigs_dir = os.path.join(output_dir, "assembly","{comparisonGroup}","{id}_assembly"),
+        contigs_dir = os.path.join(output_dir, "assemblyContigsOnly","{comparisonGroup}"),
         training_file = os.path.join(output_dir,"trainingFiles","{comparisonGroup}","{id}.trn")
     output:
         createSchema = directory(os.path.join(output_dir,"cgMLST","{comparisonGroup}","{id}","schema")),
@@ -253,5 +263,3 @@ rule grapetree:
     
     
 
-
-        
