@@ -8,4 +8,4 @@ tasks:
       conda activate base
       #mamba install -y -q -c bioconda
       bash tests/test.data.sh
-      bash test/test.db.sh
+      bash tests/test.db.sh
