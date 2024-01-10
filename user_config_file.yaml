@@ -14,24 +14,17 @@ Samples:
     specie: Metamycoplasma hominis
     username: '1'
   sample3:
+    R1Fastq: fastq/SRR11901824_1.fastq.gz
+    R2Fastq: fastq/SRR11901824_2.fastq.gz
+    comparisonGroup: '1'
+    id: SRR11901824
+    specie: Metamycoplasma hominis
+    username: '1'
+  sample4:
     R1Fastq: fastq/SRR11901825_1.fastq.gz
     R2Fastq: fastq/SRR11901825_2.fastq.gz
     comparisonGroup: '1'
     id: SRR11901825
     specie: Metamycoplasma hominis
-    username: '1'
-  sample5:
-    R1Fastq: fastq/ERR885453_1.fastq.gz
-    R2Fastq: fastq/ERR885453_2.fastq.gz
-    comparisonGroup: '2'
-    id: ERR885453
-    specie: Raoultella ornithinolytica
-    username: '1'
-  sample6:
-    R1Fastq: fastq/ERR1539195_1.fastq.gz
-    R2Fastq: fastq/ERR1539195_2.fastq.gz
-    comparisonGroup: '2'
-    id: ERR1539195
-    specie: Raoultella ornithinolytica
     username: '1'
 __use_yte__: true

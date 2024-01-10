@@ -28,7 +28,7 @@ rule all:
         expand(output_dir+"/bracken/{sample}.bracken_output.tsv", sample = config["Samples"].keys()),
         expand(output_dir+"/sample_validation/{sample}.output.txt", sample = config["Samples"].keys()),
         expand(output_dir+"/assembly/comparisonGroup{comparisonGroup}/{sample}_assembly", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
-        expand(output_dir+"/assemblyContigsOnly/comparisonGroup{comparisonGroup}", comparisonGroup = [item[0] for item in comparisonGroupTuples]),
+        #expand(output_dir+"/assemblyContigsOnly/comparisonGroup{comparisonGroup}", comparisonGroup = [item[0] for item in comparisonGroupTuples]),
         expand(output_dir+"/wgkb/comparisonGroup{comparisonGroup}/{sample}/{sample}.kraken_taxonomy.txt", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
         expand(output_dir+"/wgkb/comparisonGroup{comparisonGroup}/{sample}/{sample}.kraken_output.txt", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
         expand(output_dir+"/wgkb/comparisonGroup{comparisonGroup}/{sample}/{sample}.bracken_output.txt", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
@@ -112,6 +112,8 @@ rule sample_validation:
 rule assembly:
     conda:
          "env/conda-assembly.yaml"
+    priority:
+        50
     input:
         clean_fwd = os.path.join(output_dir, "fastq", "{id}", "{id}.clean_fwd.fastq.gz"),
         clean_rev = os.path.join(output_dir, "fastq", "{id}", "{id}.clean_rev.fastq.gz"),
@@ -122,16 +124,6 @@ rule assembly:
     shell:
         """
         shovill --R1 {input.clean_fwd} --R2 {input.clean_rev} --outdir {output.assembly_output} --assembler skesa
-        
-        """
-rule create_assembly_groups:
-    input:
-        assembly_comp_group = os.path.join(output_dir,"assembly","comparisonGroup{comparisonGroup}")
-    output:
-        assembly_group_only_contigs = directory(output_dir+"/assemblyContigsOnly/comparisonGroup{comparisonGroup}")
-    shell:
-        """
-        python  scripts/contigsOnly.py {input.assembly_comp_group} {output.assembly_group_only_contigs}
         
         """
 
@@ -214,11 +206,14 @@ rule create_training_file:
         prodigal -i {input.contigs_file}/contigs.fa -t {output.training_file} -p single
 
         """    
+
+
 rule adhoc_cgMLST:
     conda:
         "env/conda-chewBBACA.yaml"
+    params:
+        comparisonGroup = lambda wildcards: config["Samples"][wildcards.id[:7]]["comparisonGroup"]
     input:
-        contigs_dir = os.path.join(output_dir, "assemblyContigsOnly","{comparisonGroup}"),
         training_file = os.path.join(output_dir,"trainingFiles","{comparisonGroup}","{id}.trn")
     output:
         createSchema = directory(os.path.join(output_dir,"cgMLST","{comparisonGroup}","{id}","schema")),
@@ -226,10 +221,25 @@ rule adhoc_cgMLST:
         MST = directory(os.path.join(output_dir,"cgMLST","{comparisonGroup}","{id}","MST"))
 
     shell:
-        """
-        chewBBACA.py CreateSchema -i {input.contigs_dir} -o {output.createSchema} --ptf {input.training_file} --cpu 20
-       # Loop until the condition is met
-        until chewBBACA.py AlleleCall -i {input.contigs_dir} -g {output.createSchema}/schema_seed/ -o {output.allelecall} --cpu 14; do
+       """
+        for comp_group_dir in output/assembly/comparisonGroup*/; do
+            comp_group=$(basename "$comp_group_dir")
+            output_dir="output/assemblyContigsOnly/$comp_group"
+
+            # Create the output directory if it doesn't exist
+            mkdir -p "$output_dir"
+
+            # Copy contigs.fa from each sample assembly to the output directory
+            for assembly_dir in "$comp_group_dir"/*/; do
+                sample_id=$(basename "$assembly_dir")
+                cp "$assembly_dir/contigs.fa" "$output_dir/${{sample_id}}_contigs.fa"
+            done
+        done
+
+        chewBBACA.py CreateSchema -i output/assemblyContigsOnly/comparisonGroup{params.comparisonGroup}/ -o {output.createSchema} --ptf {input.training_file} --cpu 20
+
+        # Loop until the condition is met
+        until chewBBACA.py AlleleCall -i output/assemblyContigsOnly/comparisonGroup{params.comparisonGroup} -g {output.createSchema}/schema_seed/ -o {output.allelecall} --cpu 14; do
             if [ ! -f {output.allelecall}/results_statistics.tsv ]; then
                 continue
             fi
@@ -238,11 +248,11 @@ rule adhoc_cgMLST:
                 break
             fi
         done
-        cut -f 2 {output.allelecall}/paralogous_loci.tsv | sed 's/|/\\n/g' {output.allelecall}/paralogous_loci.tsv
-        chewBBACA.py RemoveGenes -i {output.allelecall}/results_alleles.tsv -g {output.allelecall}/paralogous_loci.tsv -o            {output.allelecall}//results_alleles.no_paralogs.tsv
-      chewBBACA.py ExtractCgMLST -i {output.allelecall}/results_alleles.no_paralogs.tsv -o {output.MST}
 
-       """
+        cut -f 2 {output.allelecall}/paralogous_loci.tsv | sed 's/|/\\n/g' {output.allelecall}/paralogous_loci.tsv
+        chewBBACA.py RemoveGenes -i {output.allelecall}/results_alleles.tsv -g {output.allelecall}/paralogous_loci.tsv -o {output.allelecall}/results_alleles.no_paralogs.tsv
+        chewBBACA.py ExtractCgMLST -i {output.allelecall}/results_alleles.no_paralogs.tsv -o {output.MST}
+        """
 
 rule grapetree:
     conda:
@@ -258,8 +268,3 @@ rule grapetree:
         """
 
     
-
-            
-    
-    
-
