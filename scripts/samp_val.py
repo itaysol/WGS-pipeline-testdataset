@@ -22,12 +22,13 @@ def main(input_file, organism, sampleid, output_path) -> None:
             other_species_criteria = False  # found a specie with > 6% abundance
     my_row = data[data['name'] == organism]
     my_abundance = my_row['fraction_total_reads']
+    print(f"the abundance of {organism} is {my_abundance[0]}")
     my_row = pd.DataFrame(data[data['name'] == organism])
     other_rows = pd.DataFrame(selected_rows)
     if my_specie_criteria and other_species_criteria:
         with open(output_path, 'w') as output_file:
             output_file.write(sampleid + '. PASSED.\n\n')
-    elif not my_abundance.empty and my_abundance < 0.7:
+    elif not my_abundance.empty and my_abundance[0] < 0.7:
         with open(output_path, 'w') as output_file:
             output_file.write(sampleid + '. FAILED. ' + organism + ' abundance is less than 0.7\n\n')
     elif not other_species_criteria:

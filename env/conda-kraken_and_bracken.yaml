@@ -1,4 +1,4 @@
-name: gene-pipeline-whole-genome-validation
+name: gene-pipeline-kraken-and-bracken
 channels:
   - conda-forge
   - bioconda
@@ -7,6 +7,5 @@ channels:
 dependencies:
   - bioconda::kraken2
   - bioconda::bracken
-  - bioconda::mlst
   - anaconda
   

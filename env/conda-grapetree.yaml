@@ -1,0 +1,54 @@
+name: gene-pipeline-grapetree
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+  - r
+dependencies:
+  - _libgcc_mutex=0.1
+  - _openmp_mutex=4.5
+  - ca-certificates=2020.11.8
+  - certifi=2020.11.8
+  - ld_impl_linux-64=2.35.1
+  - libffi=3.2.1
+  - libgcc-ng=9.3.0
+  - libgomp=9.3.0
+  - libstdcxx-ng=9.3.0
+  - ncurses=6.2
+  - openssl=1.1.1h
+  - pip=20.2.4
+  - python=3.8.6
+  - python_abi=3.8
+  - readline=8.0
+  - sqlite=3.33.0
+  - tk=8.6.10
+  - wheel=0.35.1
+  - xz=5.2.5
+  - zlib=1.2.11
+  - pip:
+    - chardet==3.0.4
+    - click==7.1.2
+    - decorator==4.4.2
+    - ete3==3.1.2
+    - flask==1.1.2
+    - grapetree==2.2
+    - idna==2.10
+    - itsdangerous==1.1.0
+    - jinja2==2.11.2
+    - llvmlite==0.34.0
+    - markupsafe==1.1.1
+    - networkx==2.5
+    - numba==0.51.2
+    - numpy==1.19.4
+    - pandas==1.1.4
+    - psutil==5.7.3
+    - python-dateutil==2.8.1
+    - pytz==2020.4
+    - requests==2.25.0
+    - setuptools==50.3.2
+    - six==1.15.0
+    - unidecode==1.1.1
+    - urllib3==1.26.2
+    - werkzeug==1.0.1
+
+

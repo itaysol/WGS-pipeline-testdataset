@@ -1,8 +1,8 @@
-name: gene-pipeline-speciesID
+name: gene-pipeline-prodigal
 channels:
   - conda-forge
   - bioconda
   - defaults
   - anaconda
 dependencies:
-  - bioconda::kraken2
+  - bioconda::prodigal
