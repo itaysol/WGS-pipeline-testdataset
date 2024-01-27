@@ -37,7 +37,7 @@ rule all:
         expand(output_dir+"/abricate/comparisonGroup{comparisonGroup}/vfdb/{sample}.abricate.vfdb.tsv", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
         expand(output_dir+"/AMR/comparisonGroup{comparisonGroup}/{sample}.amrfinderplus.tsv", zip, comparisonGroup = [item[0] for item in comparisonGroupTuples], sample = [item[1] for item in comparisonGroupTuples]),
         expand(output_dir+"/cgMLST/comparisonGroup{comparisonGroup}/contigs_dir", comparisonGroup = [item[0] for item in comparisonGroupTuples]),
-        expand(output_dir+"/cgMLST/comparisonGroup{comparisonGroup}/trainingFiles,trn_dir",comparisonGroup = [item[0] for item in comparisonGroupTuples]),
+        expand(output_dir+"/cgMLST/comparisonGroup{comparisonGroup}/trainingFiles/trn_file.trn",comparisonGroup = [item[0] for item in comparisonGroupTuples]),
         expand(output_dir+"/cgMLST/comparisonGroup{comparisonGroup}/schema", comparisonGroup = [item[0] for item in comparisonGroupTuples]),
         expand(output_dir+"/cgMLST/comparisonGroup{comparisonGroup}/Allelecall",  comparisonGroup = [item[0] for item in comparisonGroupTuples]),
         expand(output_dir+"/cgMLST/comparisonGroup{comparisonGroup}/MST", comparisonGroup = [item[0] for item in comparisonGroupTuples]),

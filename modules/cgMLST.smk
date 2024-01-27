@@ -16,6 +16,24 @@ comparisonGroupTuples, cgSpecieDict, cgCounter,specieGenomeSizeDict, cgSampleDic
 output_dir = "output"
 krakenDB = "/workspace/WGS-pipeline/databases/k2"
 
+import os
+import sys
+from snakemake.io import glob_wildcards
+import yaml
+import csv
+import itertools
+import pandas as pd
+from scripts.parser import *
+from datetime import datetime
+
+
+
+
+configfile : parser(config["file"])
+comparisonGroupTuples, cgSpecieDict, cgCounter,specieGenomeSizeDict, cgSampleDict = setComparisonGroups(config)
+output_dir = "output"
+krakenDB = "/workspace/WGS-pipeline/databases/k2"
+
 rule create_contig_dirs:
     input:
         assembly = lambda wildcards: expand(os.path.join(output_dir, "assembly", f"{wildcards.comparisonGroup}", "{sample}_assembly", "contigs.fa"), sample=cgSampleDict[f"{wildcards.comparisonGroup}"[-1]]),
@@ -34,19 +52,18 @@ rule create_training_file:
         specie = lambda wildcards: cgSpecieDict[wildcards.comparisonGroup[-1]],
         specie_no_spaces = lambda wildcards: cgSpecieDict[wildcards.comparisonGroup[-1]].replace(" ","") 
     output:
-        specie_zip = os.path.join(output_dir,"cgMLST",{comparisonGroup},"trainingFiles","{params.specie_no_spaces}_ref.zip"),
-        specie_unzip = os.path.join(output_dir,"cgMLST","{comparisonGroup}","trainingFiles"),
-        training_file = os.path.join(output_dir,"cgMLST","{comparisonGroup}","trainingFiles","trn_dir")
+        specie_zip = directory(os.path.join(output_dir,"cgMLST","{comparisonGroup}","trainingFiles")),
+        training_file = os.path.join(output_dir,"cgMLST","{comparisonGroup}","trainingFiles","trn_file.trn")
     shell:
         """
-        datasets download genome taxon "{params.specie}"  --reference --include genome --filename {output.specie_zip}
-        unzip {output.specie_zip} -d {output.specie_unzip}
+        datasets download genome taxon "{params.specie}"  --reference --include genome --filename {output.specie_zip}/{params.specie_no_spaces}.zip
+        unzip {output.specie_zip}/{params.specie_no_spaces}.zip -d {output.specie_zip}
         
         # Extract the path of the FNA file from dataset_catalog.json
-        fna_file_path=$(cat {output.specie_unzip}/ncbi_dataset/data/dataset_catalog.json | jq -r '.assemblies[].files[] | select(.fileType == "GENOMIC_NUCLEOTIDE_FASTA") | .filePath')
+        fna_file_path=$(cat {output.specie_zip}/ncbi_dataset/data/dataset_catalog.json | jq -r '.assemblies[].files[] | select(.fileType == "GENOMIC_NUCLEOTIDE_FASTA") | .filePath')
         
         # Run prodigal using the extracted FNA file path
-        prodigal -i {output.specie_unzip}/ncbi_dataset/data/$fna_file_path -t {output.training_file} -p single
+        prodigal -i {output.specie_zip}/ncbi_dataset/data/$fna_file_path -t {output.training_file} -p single
         
         """    
 
@@ -56,7 +73,7 @@ rule adhoc_cgMLST:
         "env/conda-chewBBACA.yaml"
     input:
         contigs_dir = os.path.join(output_dir,"cgMLST","{comparisonGroup}","contigs_dir"),
-        training_file = os.path.join(output_dir,"cgMLST","{comparisonGroup}","trainingFiles","trn_dir"),
+        training_file = os.path.join(output_dir,"cgMLST","{comparisonGroup}","trainingFiles","trn_file.trn")
     output:
         createSchema = directory(os.path.join(output_dir,"cgMLST","{comparisonGroup}","schema")),
         allelecall = directory(os.path.join(output_dir,"cgMLST","{comparisonGroup}","Allelecall")),
