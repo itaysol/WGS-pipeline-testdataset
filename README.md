@@ -1,41 +1,18 @@
-# NCBI Datasets
+# WGS-pipeline
 
-https://www.ncbi.nlm.nih.gov/datasets
-
-This zip archive contains an NCBI Datasets Data Package.
-
-NCBI Datasets Data Packages can include sequence, annotation and other data files, and metadata in one or more data report files.
-Data report files are in JSON Lines format.
-
----
-## FAQs
-### Where is the data I requested?
-
-Your data is in the subdirectory `ncbi_dataset/data/` contained within this zip archive.
-
-### I still can't find my data, can you help?
-
-We have identified a bug affecting Mac Safari users. When downloading data from the NCBI Datasets web interface, you may see only this README file after the download has completed (while other files appear to be missing).
-As a workaround to prevent this issue from recurring, we recommend disabling automatic zip archive extraction in Safari until Apple releases a bug fix.
-For more information, visit:
-https://www.ncbi.nlm.nih.gov/datasets/docs/reference-docs/mac-zip-bug/
-
-### How do I work with JSON Lines data reports?
-
-Visit our JSON Lines data report documentation page:
-https://www.ncbi.nlm.nih.gov/datasets/docs/v2/tutorials/working-with-jsonl-data-reports/
-
-### What is NCBI Datasets?
-
-NCBI Datasets is a new resource that lets you easily gather data from across NCBI databases. Find and download gene, transcript, protein and genome sequences, annotation and metadata.
-
-### Where can I find NCBI Datasets documentation?
-
-Visit the NCBI Datasets documentaion pages:
-https://www.ncbi.nlm.nih.gov/datasets/docs/
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/itaysol/Gene-pipeline)
 
 ---
 
-National Center for Biotechnology Information
-National Library of Medicine
-info@ncbi.nlm.nih.gov
+## pipeline structure
+
+from bohra (https://github.com/MDU-PHL/bohra): ![pipeline](Bohra.workflow.png)
+
+| step | name | nodes on figure | tools involved |
+| --- | --- | --- | --- |
+| 1 | QC | [Paired end reads] -> [Quality check reads] | fastp [https://github.com/opengene/fastp], mutliQC [https://multiqc.info/] |
+| 2 | reads species ID | [Quality check reads] -> [Species identification (kraken2)] | kraken2 [https://github.com/DerrickWood/kraken2], bracken [https://github.com/jenniferlu717/Bracken], KrakenTools [https://github.com/jenniferlu717/KrakenTools], multiQC [https://multiqc.info/] |
+| 3 | assembly | [Quality check reads] -> [assembly with Shovill (skesa, spades)] | shovill [https://github.com/tseemann/shovill] |
+| 4 | assembly species ID | [assembly with Shovill (skesa, spades)] -> [Quality check assemblies] -> [mlst] | kraken2, bracken, KrakenTools, seqkit [https://github.com/shenwei356/seqkit], mlst [https://github.com/tseemann/mlst], rMLST [https://github.com/Kincekara/rMLST] |
+| 5 | resistome | [Quality check assemblies] -> [AMR genes] | abricate [https://github.com/tseemann/abricate], amrfinderplus [https://github.com/ncbi/amr], hamronization [https://github.com/pha4ge/hAMRonization] |
+| 6 | virulome | [Quality check assemblies] -> [Virulence genes] | abricate, hamronization |
