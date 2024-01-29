@@ -4,6 +4,7 @@ channels:
   - bioconda
   - defaults
 dependencies:
+  - conda-forge::requests
   - mlst
   - curl
   - jq

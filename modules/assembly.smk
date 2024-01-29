@@ -84,7 +84,7 @@ rule run_mlst:
     shell:
         """
         mlst {input.contigs_file} > {output.mlst_output}
-        bash ./rMLST/rmlst.sh {input.contigs_file} > {output.rmlst_output}
+        python scripts/rmlst.py --file {input.contigs_file} > {output.rmlst_output}
         
         """
 rule resistome_and_virulome:
