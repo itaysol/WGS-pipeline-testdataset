@@ -6,3 +6,4 @@ channels:
   - anaconda
 dependencies:
   - bioconda::prodigal
+  - conda-forge::ncbi-datasets-cli
