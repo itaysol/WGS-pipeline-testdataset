@@ -17,6 +17,8 @@ output_dir = "output"
 krakenDB = "/workspace/WGS-pipeline/databases/k2"
 
 rule assembly:
+    wildcard_constraints:
+        id = r'[^/]+'
     conda:
          "env/conda-assembly.yaml"
     priority:
@@ -29,8 +31,8 @@ rule assembly:
     params:
         genome_size = lambda wildcards: specieGenomeSizeDict[config["Samples"][wildcards.id[:7]]["specie"]]
     output:
-        assembly_dir = directory(os.path.join(output_dir, "assembly", "{comparisonGroup}", "{id}_assembly")),
-        assembly_output = os.path.join(output_dir, "assembly", "{comparisonGroup}", "{id}_assembly","contigs.fa")
+        assembly_dir = directory(os.path.join(output_dir, "assembly","{id}_assembly")),
+        assembly_output = os.path.join(output_dir, "assembly","{id}_assembly","contigs.fa")
     shell:
         """
         shovill --cpus {threads} --R1 {input.clean_fwd} --R2 {input.clean_rev} --force --gsize {params.genome_size}M --outdir {output.assembly_dir} --assembler skesa
@@ -38,6 +40,8 @@ rule assembly:
         """
 
 rule whole_genome_krak_brack:
+    wildcard_constraints:
+        id = r'[^/]+'
     conda:
         "env/conda-kraken_and_bracken.yaml"
     params:
@@ -45,11 +49,11 @@ rule whole_genome_krak_brack:
         sample_id = lambda wildcards: wildcards.id,
         db = krakenDB
     input:
-        contigs_file = os.path.join(output_dir, "assembly","{comparisonGroup}","{id}_assembly","contigs.fa")
+        contigs_file = os.path.join(output_dir, "assembly","{id}_assembly","contigs.fa")
     output:
-        wgv_kraken_report = os.path.join(output_dir, "assemblySpeciesID","wgkb","{comparisonGroup}" ,"{id}", "{id}.kraken_taxonomy.txt"),
-        wgv_kraken_output = os.path.join(output_dir, "assemblySpeciesID","wgkb","{comparisonGroup}", "{id}", "{id}.kraken_output.txt"),
-        wgv_bracken_output = os.path.join(output_dir, "assemblySpeciesID","wgkb", "{comparisonGroup}","{id}", "{id}.bracken_output.txt"),
+        wgv_kraken_report = os.path.join(output_dir, "assemblySpeciesID","wgkb","{id}", "{id}.kraken_taxonomy.txt"),
+        wgv_kraken_output = os.path.join(output_dir, "assemblySpeciesID","wgkb", "{id}", "{id}.kraken_output.txt"),
+        wgv_bracken_output = os.path.join(output_dir, "assemblySpeciesID","wgkb","{id}", "{id}.bracken_output.txt"),
     shell:
         """
         kraken2 --db {params.db} \
@@ -60,6 +64,8 @@ rule whole_genome_krak_brack:
 
         """
 rule whole_genome_validation:
+    wildcard_constraints:
+        id = r'[^/]+'
     input:
         bracken_output =  os.path.join(output_dir, "assemblySpeciesID","wgkb","{id}", "{id}.bracken_output.txt"),
     params:
@@ -77,10 +83,10 @@ rule run_mlst:
     params:
         comparisonGroup = lambda wildcards: config["Samples"][wildcards.id[:7]]["comparisonGroup"]
     input:
-        contigs_file = os.path.join(output_dir, "assembly","{comparisonGroup}", "{id}_assembly","contigs.fa")
+        contigs_file = os.path.join(output_dir, "assembly" , "{id}_assembly","contigs.fa")
     output:
-        mlst_output = os.path.join(output_dir,"assemblySpeciesID" ,"mlst","{comparisonGroup}", "{id}.contigs.mlst.tsv"),
-        rmlst_output = os.path.join(output_dir,"assemblySpeciesID", "rmlst", "{comparisonGroup}","{id}.tsv")
+        mlst_output = os.path.join(output_dir,"assemblySpeciesID" ,"mlst","{id}.contigs.mlst.tsv"),
+        rmlst_output = os.path.join(output_dir,"assemblySpeciesID", "rmlst","{id}.tsv")
     shell:
         """
         mlst {input.contigs_file} > {output.mlst_output}
@@ -93,11 +99,11 @@ rule resistome_and_virulome:
     params:
         comparisonGroup = lambda wildcards: config["Samples"][wildcards.id[:7]]["comparisonGroup"]
     input:
-        contigs_file = os.path.join(output_dir, "assembly","{comparisonGroup}","{id}_assembly","contigs.fa"),
+        contigs_file = os.path.join(output_dir, "assembly","{id}_assembly","contigs.fa"),
     output:
-        abricate_card = os.path.join(output_dir,"abricate","{comparisonGroup}","card","{id}.abricate.card.tsv"),
-        abricate_vfdb = os.path.join(output_dir,"abricate","{comparisonGroup}","vfdb","{id}.abricate.vfdb.tsv"),
-        AMR = os.path.join(output_dir,"AMR","{comparisonGroup}","{id}.amrfinderplus.tsv")
+        abricate_card = os.path.join(output_dir,"abricate","card","{id}.abricate.card.tsv"),
+        abricate_vfdb = os.path.join(output_dir,"abricate","vfdb","{id}.abricate.vfdb.tsv"),
+        AMR = os.path.join(output_dir,"AMR","{id}.amrfinderplus.tsv")
     shell:
         """
         abricate --db card --minid 60 --mincov 60 {input.contigs_file} > {output.abricate_card}

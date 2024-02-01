@@ -20,6 +20,8 @@ krakenDB = "/workspace/WGS-pipeline/databases/k2"
 
 
 rule process_file_pair:
+    wildcard_constraints:
+        id = r'[^/]+'
     conda:
         "env/conda-qc.yaml"
     threads:
@@ -27,15 +29,15 @@ rule process_file_pair:
     priority:
         50
     input:
-        fwd = lambda wildcards: config["Samples"][wildcards.id[:7]]["R1Fastq"],
-        rev = lambda wildcards: config["Samples"][wildcards.id[:7]]["R2Fastq"]
+        fwd = lambda wildcards: config["Samples"][wildcards.id]["R1Fastq"],
+        rev = lambda wildcards: config["Samples"][wildcards.id]["R2Fastq"]
     output:
-        r1_clean = os.path.join(output_dir, "fastq/{id}/{id}.clean_fwd.fastq.gz"),
-        r2_clean = os.path.join(output_dir, "fastq/{id}/{id}.clean_rev.fastq.gz"),
-        html = temporary(os.path.join(output_dir, "fastq/{id}/{id}.fastp.html")),
-        json = temporary(os.path.join(output_dir, "fastq/{id}/{id}.fastp.json"))
+        r1_clean = os.path.join(output_dir, "fastq","{id}","{id}.clean_fwd.fastq.gz"),
+        r2_clean = os.path.join(output_dir, "fastq","{id}","{id}.clean_rev.fastq.gz"),
+        html = os.path.join(output_dir, "fastq","{id}","{id}.fastp.html"),
+        json = os.path.join(output_dir, "fastq","{id}","{id}.fastp.json")
     log:
-        output_dir+"/fastq/{id}/{id}.fastp.log.txt"
+        os.path.join(output_dir, "fastq","{id}","{id}.fastp.log.txt")
     shell:
         """
         fastp -i {input.fwd} -I {input.rev} \

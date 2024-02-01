@@ -9,25 +9,10 @@ from scripts.parser import *
 from datetime import datetime
 
 
-
-
 configfile : parser(config["file"])
 comparisonGroupTuples, cgSpecieDict, cgCounter,specieGenomeSizeDict, cgSampleDict = setComparisonGroups(config)
 output_dir = "output"
 krakenDB = "/workspace/WGS-pipeline/databases/k2"
-
-import os
-import sys
-from snakemake.io import glob_wildcards
-import yaml
-import csv
-import itertools
-import pandas as pd
-from scripts.parser import *
-from datetime import datetime
-
-
-
 
 configfile : parser(config["file"])
 comparisonGroupTuples, cgSpecieDict, cgCounter,specieGenomeSizeDict, cgSampleDict = setComparisonGroups(config)
@@ -35,14 +20,16 @@ output_dir = "output"
 krakenDB = "/workspace/WGS-pipeline/databases/k2"
 
 rule create_contig_dirs:
+    wildcard_constraints:
+        id = r'[^/]+'
     input:
-        assembly = lambda wildcards: expand(os.path.join(output_dir, "assembly", f"{wildcards.comparisonGroup}", "{sample}_assembly", "contigs.fa"), sample=cgSampleDict[f"{wildcards.comparisonGroup}"[-1]]),
+         assembly = expand(os.path.join(output_dir, "assembly", "{sample}_assembly", "contigs.fa"), sample=sampleToGroupDict.keys())
     output:
-        contigs_dir = directory(os.path.join(output_dir,"cgMLST","{comparisonGroup}","contigs_dir"))
+        contigs_dir = directory(expand(os.path.join(output_dir,"cgMLST","comparisonGroup{comparisonGroup}","contigs_dir"),comparisonGroup = cgSampleDict.keys()))
     shell:
         """
-        python scripts/extract_contigs.py {input.assembly[0]} {output.contigs_dir} 
-        
+        export SAMPLE_TO_GROUP_DICT='{sampleToGroupDict}'; python scripts/extract_contigs.py {input.assembly}
+ 
         """
 
 rule create_training_file:
@@ -50,7 +37,7 @@ rule create_training_file:
         "env/conda-prodigal.yaml"
     params:
         specie = lambda wildcards: cgSpecieDict[wildcards.comparisonGroup[-1]],
-        specie_no_spaces = lambda wildcards: cgSpecieDict[wildcards.comparisonGroup[-1]].replace(" ","") 
+        specie_no_spaces =  lambda wildcards: cgSpecieDict[wildcards.comparisonGroup[-1]].replace(" ","") 
     output:
         specie_zip = directory(os.path.join(output_dir,"cgMLST","{comparisonGroup}","trainingFiles")),
         training_file = os.path.join(output_dir,"cgMLST","{comparisonGroup}","trainingFiles","trn_file.trn")
