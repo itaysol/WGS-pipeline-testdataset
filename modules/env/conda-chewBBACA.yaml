@@ -1,9 +1,0 @@
-name: gene-pipeline-chewBBACA
-channels:
-  - conda-forge
-  - bioconda
-  - defaults
-  - anaconda
-dependencies:
-  - bioconda::chewBBACA
-  
