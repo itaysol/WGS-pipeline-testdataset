@@ -1,8 +1,0 @@
-.snakemake/
-fastq/
-output/
-databases/
-ncbi_dataset/
-datasets
-shovill/
-cgMLST/
